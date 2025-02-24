@@ -1,0 +1,42 @@
+﻿#include "TerrainsBase.h"
+
+const float TerrainsBase::k_magnetRange = 40.0f;
+const float TerrainsBase::k_magnetPower = 1.0f;
+nlohmann::json TerrainsBase::m_gimmickData;
+
+TerrainsBase::TerrainsBase()
+{
+	std::ifstream ifs("Asset/Data/Gimmick/GimmickParamData/GimmickParamData.json");
+	if (ifs) {
+		ifs >> m_gimmickData;
+	}
+
+	m_randomId = rand();
+}
+
+void TerrainsBase::DrawLit()
+{
+	if(m_model)
+	{
+		KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
+	}
+}
+
+void TerrainsBase::DrawBright()
+{
+	//磁力をまとっていないなら描画しない
+	if ((m_maguneForce & NoForce) != 0) return;
+
+	Math::Color color;
+	if ((m_maguneForce & MagunePowerN) != 0)
+	{
+		//N極の場合赤色に光らせる
+		color = { 1,0,0 };
+	}
+	else if ((m_maguneForce & MagunePowerS) != 0)
+	{
+		//S極の場合青色に光らせる
+		color = { 0,0,1 };
+	}
+	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, color);
+}
