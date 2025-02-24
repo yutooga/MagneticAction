@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include "../2DTitleObjBase.h"
 
-class Title : public KdGameObject
+class Title : public _2DTitleObjBase
 {
 public:
 	Title(){}
@@ -12,8 +13,4 @@ public:
 
 private:
 
-	// 画像の実体
-	KdTexture m_tex;
-
-	Math::Rectangle m_rectAngle = { 0,0,1028,114 };
 };

@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include "../2DTitleObjBase.h"
 
-class StartBar : public KdGameObject
+class StartBar : public _2DTitleObjBase
 {
 public:
 	StartBar() {}
@@ -18,20 +19,15 @@ public:
 
 private:
 
-	// 画像の実体
-	KdTexture m_tex;
+	// スタートボタンの点滅処理
+	void Flashing();
 
 	// スタート押される前か判断するフラグ
 	bool m_startFlg = false;
 
-	// 透明度
-	float m_alpha = 0.0f;
-
 	// 透明度の加算量
-	float m_alphaAdd = 0.01f;
+	float m_alphaAdd = 0.f;
 
 	// おしっぱ制御フラグ
 	bool m_pushFlg = true;
-
-	Math::Rectangle m_rectAngle = { 0,0,1027,114 };
 };

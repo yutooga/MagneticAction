@@ -18,8 +18,9 @@ private :
 	void Event() override;
 	void Init() override;
 
+	// フェードインの実態
 	std::weak_ptr<TitleFadeIn> m_fadeIn;
 
 	//SE再生されたかどうか判断フラグ
-	bool sePlayFlg = false;
+	bool m_sePlayFlg = false;
 };

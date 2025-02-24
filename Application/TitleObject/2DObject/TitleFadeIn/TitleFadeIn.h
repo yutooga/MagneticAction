@@ -1,10 +1,11 @@
 ﻿#pragma once
+#include "../2DTitleObjBase.h"
 
-class TitleFadeIn : public KdGameObject
+class TitleFadeIn : public _2DTitleObjBase
 {
 public:
 	TitleFadeIn() {}
-	~TitleFadeIn() {}
+	~TitleFadeIn()override{}
 
 	void Init()override;
 
@@ -24,14 +25,6 @@ public:
 
 private:
 
-	// 画像の実体
-	KdTexture m_tex;
-
-	// 透明度
-	float m_alpha = 0.0f;
-
-	// フェードインするかどうか判断するフラグ
+	// フェードイン開始判断フラグ
 	bool m_FadeInFlg = false;
-
-	Math::Rectangle m_rectAngle = { 0,0,1280,720 };
 };
