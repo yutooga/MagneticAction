@@ -45,8 +45,10 @@ private:
 	//テキストの更新
 	void TextureUpdate();
 
+	// 銃取得関数
 	void GetMagneGun();
 
+	// モデルの実態
 	std::shared_ptr<KdModelWork> m_model;
 
 	//オブジェクトの大きさ
@@ -76,7 +78,8 @@ private:
 	// オブジェクトの最初の座標
 	Math::Vector3 m_firstPos;
 
-	std::string m_effecName;
+	// エフェクトの名前
+	std::string m_effectName;
 
 	// jsonファイルから読みとった値を格納する変数
 	nlohmann::json m_magneGunData;

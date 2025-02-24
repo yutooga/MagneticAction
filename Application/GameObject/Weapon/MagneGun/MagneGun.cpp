@@ -8,8 +8,7 @@ const float MagneGun::k_grantScope = 400.f;
 void MagneGun::Init()
 {
 	// jsonファイルから情報を読み込んでくる
-
-	std::ifstream ifs("Asset/Data/Weapon/MagneGunData.json");
+	std::ifstream ifs("Asset/Data/GameScene/3DObject/Weapon/MagneGun/MagneGunData.json");
 	if (ifs) {
 		ifs >> m_magneGunData;
 	}
@@ -18,21 +17,26 @@ void MagneGun::Init()
 	if(!m_model)
 	{
 		m_model = std::make_shared<KdModelData>();
-		m_model->Load("Asset/Models/Weapon/MaguneGun/MaguneGun.gltf");
+		m_model->Load(m_magneGunData["URL"]);
 	}
 
 	// 座標の初期化
 	m_pos = { m_magneGunData["FirstPos"].value("X",0.35f),m_magneGunData["FirstPos"].value("Y",-0.25f),m_magneGunData["FirstPos"].value("Z",0.2f) };
 
+	// 回転角度の初期化
+	m_rotAngle = m_magneGunData.value("DefaultAngle", 90.f);
+
+	// モデルのサイズの初期化
+	m_modelSize = m_magneGunData.value("Scale", 0.005f);
+
 	//親から銃口へのローカル行列
 	//銃本体から銃口への相対位置と親から武器本体への相対位置を
-	Math::Vector3 localMuzzlePos = { m_magneGunData["LocalMuzzlePos"].value("X",0.0f),m_magneGunData["LocalMuzzlePos"].value("Y",0.105f),m_magneGunData["LocalMuzzlePos"].value("Z",0.5f) };
+	Math::Vector3 localMuzzlePos = { m_magneGunData["LocalMuzzlePos"].value("X",0.0f),
+		m_magneGunData["LocalMuzzlePos"].value("Y",0.105f),m_magneGunData["LocalMuzzlePos"].value("Z",0.5f) };
 	m_localMuzzleMat = Math::Matrix::CreateTranslation(localMuzzlePos);
 	m_localMuzzleMat *= Math::Matrix::CreateTranslation(m_pos);
 
 	m_pDebugWire = std::make_unique<KdDebugWireFrame>();
-
-	//m_updateFlg = true;
 }
 
 void MagneGun::Update()
@@ -40,12 +44,11 @@ void MagneGun::Update()
 	//更新フラグがfalseなら早期リターン
 	if (!m_updateFlg)return;
 
-	const std::shared_ptr<const Player> _Parent = m_parent.lock();
-	if (!_Parent)return;
+	// プレイヤーの実態がないなら早期リターン
+	std::shared_ptr<Player> _spParent = m_parent.lock();
+	if (!_spParent)return;
 
-	Math::Matrix parentMat = Math::Matrix::Identity;
-	//親の行列を持ってくる
-	parentMat = _Parent->GetMatrix();
+	Math::Matrix parentMat = _spParent->GetMatrix();	// 親の行列を持ってくる
 
 	if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
 	{
@@ -53,7 +56,7 @@ void MagneGun::Update()
 		{
 			m_shotFlg = true;
 			//S極の磁力を帯びた弾発射
-			Shot(_Parent, MagunePowerS);
+			Shot(_spParent, MagunePowerS);
 		}
 	}
 	else if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
@@ -62,7 +65,7 @@ void MagneGun::Update()
 		{
 			m_shotFlg = true;
 			//S極の磁力を帯びた弾発射
-			Shot(_Parent, MagunePowerN);
+			Shot(_spParent, MagunePowerN);
 		}
 	}
 	else
@@ -70,14 +73,11 @@ void MagneGun::Update()
 		m_shotFlg = false;
 	}
 
-	float angle = m_magneGunData.value("DefaultAngle", 90.f);
-	float scale = m_magneGunData.value("Scale", 0.005f);
-
-	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
-	Math::Matrix rotMat = Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(angle));
-	Math::Matrix scaleMat = Math::Matrix::CreateScale(scale);
 	
-
+	// 行列の確定
+	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
+	Math::Matrix rotMat = Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_rotAngle));
+	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_modelSize);
 	m_mWorld = scaleMat * rotMat * transMat * parentMat;
 }
 
@@ -91,9 +91,7 @@ void MagneGun::DrawLit()
 
 void MagneGun::Shot(const std::shared_ptr<const Player>& _parent,const UINT& _maguneForce)
 {
-	if (!m_shotFlg)return;
-
-
+	// 銃口の座上を取得
 	Math::Vector3 _muzzlePos = (m_localMuzzleMat * _parent->GetMatrix()).Translation();
 
 	//弾の発射方向
@@ -130,13 +128,14 @@ void MagneGun::Shot(const std::shared_ptr<const Player>& _parent,const UINT& _ma
 		if (hitFlg) { hitObjList.push_back(obj); }
 	}
 
-	//レイに当たったリストから一番近いオブジェクトを検出
+	
 	float maxOverLap = 0;
 	Math::Vector3 hitPos = Math::Vector3::Zero;
 	bool isHit = false;
 	auto itr = hitObjList.begin();
 	std::weak_ptr<KdGameObject> hitObj;
 
+	// レイに当たったリストから一番近いオブジェクトを検出
 	for (auto& ret : retRayList)
 	{
 		if (maxOverLap < ret.m_overlapDistance)
@@ -148,8 +147,6 @@ void MagneGun::Shot(const std::shared_ptr<const Player>& _parent,const UINT& _ma
 		}
 		itr++;
 	}
-
-	
 	
 	if(isHit)
 	{
@@ -183,19 +180,18 @@ void MagneGun::Shot(const std::shared_ptr<const Player>& _parent,const UINT& _ma
 	_bulletDir.Normalize();
 
 	// 銃弾の実体生成
+	{
+		std::shared_ptr<MaguneBullet> bullet = std::make_shared<MaguneBullet>();
+		bullet->Init();
 
-	int lifeSpan = m_magneGunData["Bullet"].value("LifeSpan", 1000);
-	float speed = m_magneGunData["Bullet"].value("Speed", 13.5f);
+		int lifeSpan = m_magneGunData["Bullet"].value("LifeSpan", 1000);
+		float speed = m_magneGunData["Bullet"].value("Speed", 13.5f);
+		bullet->SetParam(_muzzlePos, _bulletDir, lifeSpan, speed);
+		// 銃の弾に磁力を付与する
+		bullet->SetMaguneForce(_maguneForce);
+		SceneManager::Instance().AddObject(bullet);
+	}
 
-
-	std::shared_ptr<MaguneBullet> bullet = std::make_shared<MaguneBullet>();
-	bullet->Init();
-	bullet->SetParam(_muzzlePos, _bulletDir, lifeSpan,speed);
-	
-	// 銃の弾に磁力を付与する
-	bullet->SetMaguneForce(_maguneForce);
-
-	SceneManager::Instance().AddObject(bullet);
 
 	// SE再生
 	KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Weapon/MaguneGun/MaguneGun.wav", false);

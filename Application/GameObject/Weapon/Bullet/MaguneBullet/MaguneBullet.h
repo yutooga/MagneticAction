@@ -13,20 +13,13 @@ public:
 
 	void DrawLit()override;
 
-	void SetParam(Math::Vector3& _pos, Math::Vector3& _dir, int _lifespan, float _speed);
+	void SetParam(const Math::Vector3& _pos, const Math::Vector3& _dir, const int _lifespan, const float _speed);
 
-	//======================================================
-	
-	static const float k_bulletSize;	// 弾の大きさ
-
-	//======================================================
-
+	static const float k_rgbMax;	// 色の最大値
 
 private:
+	// モデルの実体
 	std::shared_ptr<KdModelWork> m_model;
-
-	//座標
-	Math::Vector3 m_pos;
 
 	//移動方向
 	Math::Vector3 m_dir;
@@ -37,6 +30,12 @@ private:
 	//弾の生存時間
 	int m_lifeSpan = 0;
 
+	// モデルのサイズ
+	float m_modelSize = 0.0f;
+
 	// 弾の回転行列
 	Math::Matrix m_rotBulletMat;
+
+	// jsonファイルから読みとった値を格納する変数
+	nlohmann::json m_magneBulletData;
 };

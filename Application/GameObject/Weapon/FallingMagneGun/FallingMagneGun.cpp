@@ -14,7 +14,7 @@ void FallingMagneGun::Init()
 {
 	// jsonファイルから情報を読み込んでくる
 
-	std::ifstream ifs("Asset/Data/Weapon/FallingMagneGunData.json");
+	std::ifstream ifs("Asset/Data/GameScene/3DObject/Weapon/FallingMagneGun/FallingMagneGunData.json");
 	if (ifs) {
 		ifs >> m_magneGunData;
 	}
@@ -23,7 +23,7 @@ void FallingMagneGun::Init()
 	if (!m_model)
 	{
 		m_model = std::make_shared<KdModelWork>();
-		m_model->SetModelData("Asset/Models/Weapon/FallingMaguneGun/FallingMaguneGun.gltf");
+		m_model->SetModelData(m_magneGunData["URL"]);
 	}
 
 	//取得可能表示テキスト
@@ -34,13 +34,10 @@ void FallingMagneGun::Init()
 		m_polygon->SetSplit(m_magneGunData["Text"].value("SplitX",2), m_magneGunData["Text"].value("SplitY", 1));
 		m_polygon->SetScale(m_magneGunData["Text"].value("Scale", 3.f));
 	}
-	
 
-	float x = m_magneGunData["FirstPos"].value("X", -112.f);
-	float y = m_magneGunData["FirstPos"].value("Y", -52.f);
-	float z  = m_magneGunData["FirstPos"].value("Z", 1825.f);
-
-	m_pos = {x,y,z};
+	// モデルの表示座標
+	m_pos = {m_magneGunData["FirstPos"].value("X", -112.f),
+		m_magneGunData["FirstPos"].value("Y", -52.f),m_magneGunData["FirstPos"].value("Z", 1825.f) };
 	m_pos.y += m_magneGunData["FirstPos"].value("AdjustPosY", 5.0f);
 
 	//デバックライン処理
@@ -58,9 +55,10 @@ void FallingMagneGun::Init()
 	float effectSize = m_magneGunData["Effect"].value("Size", 5.0f);
 	float effectSpeed = m_magneGunData["Effect"].value("Speed", 1.0f);
 
-	KdEffekseerManager::GetInstance().Play("Simple_Ring_Shape2.efkproj", effectPos, effectSize, effectSpeed, true);
+	// エフェクトの名前を保存
+	m_effectName = m_magneGunData["Effect"]["Name"];
 
-	m_effecName = "Simple_Ring_Shape2.efkproj";
+	KdEffekseerManager::GetInstance().Play(m_effectName, effectPos, effectSize, effectSpeed, true);
 }
 
 void FallingMagneGun::Update()
@@ -74,8 +72,10 @@ void FallingMagneGun::Update()
 		m_angle -= k_rotAngleMax;
 	}
 
-	const float firstPosY = m_pos.y;
-	m_pos.y = firstPosY + sin(DirectX::XMConvertToRadians(m_angle)) * k_upDownSpeed;
+	{
+		const float firstPosY = m_pos.y;
+		m_pos.y = firstPosY + sin(DirectX::XMConvertToRadians(m_angle)) * k_upDownSpeed;
+	}
 
 	//銃の行列更新
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
@@ -102,6 +102,7 @@ void FallingMagneGun::DrawLit()
 	if (!m_model)return;
 	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
 
+	// 銃の近くまで来たらテキストを表示する
 	if (!m_acquisitionFlg || !m_polygon)return;
 	KdShaderManager::Instance().m_StandardShader.DrawPolygon(*m_polygon, m_textureMat);
 }
@@ -145,7 +146,7 @@ void FallingMagneGun::JudgmentAcquisition()
 
 void FallingMagneGun::TextureUpdate()
 {
-	//取得可能状態でなければ早期リターン
+	// 取得可能状態でなければ早期リターン
 	if (!m_acquisitionFlg)return;
 	
 	//アニメーション更新
@@ -189,10 +190,12 @@ void FallingMagneGun::GetMagneGun()
 
 	if (GetAsyncKeyState(VK_RETURN) & 0x8000)
 	{
-		std::shared_ptr<MagneGun> Gun = m_gun.lock();
-		if (Gun)
 		{
-			Gun->SetUpdate(true);
+			std::shared_ptr<MagneGun> Gun = m_gun.lock();
+			if (Gun)
+			{
+				Gun->SetUpdate(true);
+			}
 		}
 
 		// レティクル作成
@@ -206,10 +209,9 @@ void FallingMagneGun::GetMagneGun()
 		m_isExpired = true;
 
 		// エフェクトを停止させる
-		KdEffekseerManager::GetInstance().StopEffect(m_effecName, m_firstPos);
+		KdEffekseerManager::GetInstance().StopEffect(m_effectName, m_firstPos);
 
 		//銃取得のSE再生
 		KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Weapon/FallingMaguneGun/Acquisition.wav", false);
-		return;
 	}
 }
