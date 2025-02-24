@@ -18,9 +18,9 @@ public:
 	void InformNextScene() { m_nextSceneFlg = true; }
 
 	//クリア状態取得関数
-	bool GetClearState() { return m_clearFlg; }
+	const bool GetClearState()const { return m_clearFlg; }
 	//次のシーンに進んでよいかを知るための関数
-	bool GetNextSceneFlg() { return m_nextSceneFlg; }
+	const bool GetNextSceneFlg()const { return m_nextSceneFlg; }
 
 	//状態リセット関数
 	void ResetAllState() 

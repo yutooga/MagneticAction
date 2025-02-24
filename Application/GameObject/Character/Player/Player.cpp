@@ -153,12 +153,12 @@ void Player::Init()
 
 	// jsonファイルから情報を読み込んでくる
 
-	std::ifstream ifs("Asset/Data/Player/Player.json");
+	std::ifstream ifs("Asset/Data/GameScene/Player/Player.json");
 	if (ifs) {
 		ifs >> m_jsonData;
 	}
 
-	std::ifstream debug("Asset/Data/Player/PlayerDebugPos.json");
+	std::ifstream debug("Asset/Data/GameScene/Player/PlayerDebugPos.json");
 	if (debug)
 	{
 		debug >> m_debugData;
@@ -166,27 +166,39 @@ void Player::Init()
 
 	// 影の画像の読み込み
 	m_polygon = std::make_shared<KdSquarePolygon>();
-	m_polygon->SetMaterial("Asset/Textures/Scene/GameScene/2DObject/PlayerShadow/shadow.png");
+	m_polygon->SetMaterial(m_jsonData["Shadow"]["URL"]);
 
 	// 影の大きさの設定
 	m_shadowSize = m_jsonData["ShadowColision"].value("ShadowSize", 10.f);
 
 	m_pDebugWire = std::make_unique<KdDebugWireFrame>();
 
+	// 復帰座標の初期化
+	m_returnPos = {
+		m_jsonData["ReturnPos"].value("X",0.f),
+		m_jsonData["ReturnPos"].value("Y",18.f),
+		m_jsonData["ReturnPos"].value("Z",0.f)
+	};
+
+	// 移動スピードの初期化
+	m_moveSpeed = m_jsonData["MoveSpeed"]["NormalSpeed"];
+
 	// プレイヤーの初期座標の補正
 	m_pos.y = m_jsonData["PlayerFirstPosY"];
 	m_pos.y += m_jsonData["AdjustHeight"];
 
 	//当たり判定用の初期化
-	DirectX::BoundingSphere sphere;
-	//球の中心位置を設定
-	sphere.Center = m_pos;
-	sphere.Center.y -= m_jsonData["PlayerColision"]["AdjustHeightY"];
-	sphere.Center.y -= m_jsonData["AdjustHeight"];
-	//球の半径を設定
-	sphere.Radius = m_jsonData["PlayerColision"]["Radius"];
-	m_pCollider = std::make_unique<KdCollider>();
-	m_pCollider->RegisterCollisionShape("PlayerColision", sphere.Center, sphere.Radius, KdCollider::TypeSight);
+	{
+		DirectX::BoundingSphere sphere;
+		//球の中心位置を設定
+		sphere.Center = m_pos;
+		sphere.Center.y -= m_jsonData["PlayerColision"]["AdjustHeightY"];
+		sphere.Center.y -= m_jsonData["AdjustHeight"];
+		//球の半径を設定
+		sphere.Radius = m_jsonData["PlayerColision"]["Radius"];
+		m_pCollider = std::make_unique<KdCollider>();
+		m_pCollider->RegisterCollisionShape("PlayerColision", sphere.Center, sphere.Radius, KdCollider::TypeSight);
+	}
 
 	//プレイヤーのサイズ
 	m_size = { m_jsonData["PlayerSize"],m_jsonData["PlayerSize"],m_jsonData["PlayerSize"] };
@@ -196,6 +208,10 @@ void Player::Init()
 
 	//カメラのローカル行列
 	m_localCamera = m_mWorld;
+
+	// カメラ回転用マウス座標の差分の初期化
+	m_FixMousePos = { m_jsonData["Mouse"]["Pos"].value("X",640),
+		m_jsonData["Mouse"]["Pos"].value("Y",360) };
 }
 
 void Player::OnHit(ObjectType _obj)
@@ -303,12 +319,15 @@ void Player::Player_TerrainColision()
 	//レイの発射方法
 	ray.m_dir = Math::Vector3::Down;
 
-	float adjustHeight = m_jsonData["AdjustHeight"];
-	float enableStepHigh = m_jsonData["ShadowColision"]["EnableStepHigh"];
+	{
+		float adjustHeight = m_jsonData["AdjustHeight"];
+		float enableStepHigh = m_jsonData["ShadowColision"]["EnableStepHigh"];
 
-	ray.m_pos.y = ray.m_pos.y - adjustHeight + enableStepHigh;
-	//レイの長さを設定
-	ray.m_range = m_gravity + enableStepHigh;
+		ray.m_pos.y = ray.m_pos.y - adjustHeight + enableStepHigh;
+		//レイの長さを設定
+		ray.m_range = m_gravity + enableStepHigh;
+	}
+
 	//当たり判定をしたいタイプを設定
 	ray.m_type = KdCollider::TypeGround;
 
@@ -367,23 +386,8 @@ void Player::Player_TerrainColision()
 
 	m_getOnJumpFlg = false;
 
-	// 反発の処理
-	if (m_repulsionFlg)
-	{
-		float repulsionAddPow = m_jsonData["Repulsion"]["RepulsionAddPow"];
-
-		m_repulsionPow += repulsionAddPow;
-		m_pos += m_repulsionDir * m_repulsionPow;
-		// 反発状態の限界を迎えたら初期状態に戻す
-
-		float repulsionLimit = m_jsonData["Repulsion"]["RepulsionLimit"];
-
-		if (m_repulsionPow > repulsionLimit)
-		{
-			m_repulsionPow = 0.0f;
-			m_repulsionFlg = false;
-		}
-	}
+	// 反発処理
+	Repulsion();
 }
 
 void Player::Player_TerrainSphereColision()
@@ -418,18 +422,17 @@ void Player::Player_TerrainSphereColision()
 		if ((hitFlg && obj->GetObjType() == ObjectType::DeathFloor) || (hitFlg && obj->GetObjType() == ObjectType::MovingDeathFloor))
 		{
 			// クールタイムが０の時に再生
-			if (m_seInterval == 0)
+			if (m_seInterval != 0)continue;
+			
+			// SE再生
+			KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/DeathFloor/DeathFloor.wav", false);
+			if (m_hp.expired() == false)
 			{
-				// SE再生
-				KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/DeathFloor/DeathFloor.wav", false);
-				if (m_hp.expired() == false)
-				{
-					m_hp.lock()->DecreaseHp();
-				}
-				// SE再生のクールタイムの設定
-				int coolTime = m_jsonData["SeCoolTime"];
-				m_seInterval = coolTime;
+				// HP減算処理
+				m_hp.lock()->DecreaseHp();
 			}
+			// SE再生のクールタイムの設定
+			m_seInterval = m_jsonData.value("SeCoolTime", 60);
 		}
 	}
 
@@ -482,8 +485,8 @@ void Player::OnTheArea()
 	}
 
 	//レイの発射位置
-	spheres[static_cast<int>(ColisionCircle::Center)].m_sphere.Center.y -= m_jsonData["ColisionDataForMagneArea"]["AdjustHighCenter"].get<float>();
-	spheres[static_cast<int>(ColisionCircle::Under)].m_sphere.Center.y -= m_jsonData["ColisionDataForMagneArea"]["AdjustHighUnder"].get<float>();
+	spheres[static_cast<int>(ColisionCircle::Center)].m_sphere.Center.y -= m_jsonData["ColisionDataForMagneArea"].value("AdjustHighCenter", 60.f);
+	spheres[static_cast<int>(ColisionCircle::Under)].m_sphere.Center.y -= m_jsonData["ColisionDataForMagneArea"].value("AdjustHighUnder", 120.f);
 
 	bool isHit = false;
 	float distance = 0.0f;
@@ -541,6 +544,28 @@ void Player::OnTheArea()
 	{
 		m_addAmount = 0.0f;
 		m_onTheAreaFlg = false;
+	}
+}
+
+void Player::Repulsion()
+{
+	// 反発の処理
+	if (!m_repulsionFlg)return;
+
+	{
+		float repulsionAddPow = m_jsonData["Repulsion"]["RepulsionAddPow"];
+		m_repulsionPow += repulsionAddPow;
+		m_pos += m_repulsionDir * m_repulsionPow;
+	}
+
+	// 反発状態の限界を迎えたら初期状態に戻す
+
+	float repulsionLimit = m_jsonData["Repulsion"]["RepulsionLimit"];
+
+	if (m_repulsionPow > repulsionLimit)
+	{
+		m_repulsionPow = 0.0f;
+		m_repulsionFlg = false;
 	}
 }
 
@@ -609,24 +634,23 @@ void Player::GameOverPlayer()
 {
 	if (m_gameover.expired() == false)return;
 
-	if (m_hp.expired() == false)
-	{
-		//HPが０になったらゲームオーバー画面にする
-		if (m_hp.lock()->GetHpNum() <= 0)
-		{
-			//=====================================
-			// ゲームオーバー初期化
-			//=====================================
-			std::shared_ptr<GameOver> gameover = std::make_shared<GameOver>();
-			gameover->Init();
-			m_gameover = gameover;
-			SceneManager::Instance().AddObject(gameover);
+	if (m_hp.expired() != false)return;
 
-			// 音関係を全て止める
-			KdAudioManager::Instance().StopAllSound();
-			// ゲームオーバーのSEを流す
-			KdAudioManager::Instance().Play("Asset/Sounds/GameScene/2DObject/GameOver/GameOver.wav");
-		}
+	//HPが０になったらゲームオーバー画面にする
+	if (m_hp.lock()->GetHpNum() <= 0)
+	{
+		//=====================================
+		// ゲームオーバー初期化
+		//=====================================
+		std::shared_ptr<GameOver> gameover = std::make_shared<GameOver>();
+		gameover->Init();
+		m_gameover = gameover;
+		SceneManager::Instance().AddObject(gameover);
+
+		// 音関係を全て止める
+		KdAudioManager::Instance().StopAllSound();
+		// ゲームオーバーのSEを流す
+		KdAudioManager::Instance().Play("Asset/Sounds/GameScene/2DObject/GameOver/GameOver.wav");
 	}
 }
 
@@ -717,6 +741,7 @@ void Player::Debug()
 // プレイヤー独自の当たられた時の処理
 void Player::OnHit(ObjectType _objType, const std::weak_ptr<KdGameObject>& _obj)
 {
+	// 実体がないなら処理をしない
 	if (_obj.expired() == true)return;
 
 	switch (_objType)
@@ -753,6 +778,7 @@ void Player::OnHit(ObjectType _objType, const std::weak_ptr<KdGameObject>& _obj)
 		m_maguneForce = NoForce;
 		break;
 	}
+	// 磁力の切り替わる床
 	case KdGameObject::ObjectType::ChangeFloor:
 		// 磁力をまとう床の斥力処理
 		if (_obj.lock()->GetMaguneForce() != m_maguneForce && (m_maguneForce & NoForce) == 0 )
@@ -765,12 +791,10 @@ void Player::OnHit(ObjectType _objType, const std::weak_ptr<KdGameObject>& _obj)
 	case KdGameObject::ObjectType::Goal:
 		if (m_pos.z >= GoalManager::instance().GetGoalPos().z)
 		{
-			if (!m_clearFlg)
-			{
-				m_clearFlg = true;
-				GoalManager::instance().CreateClearText();
-				GoalManager::instance().InformClear();
-			}
+			if (m_clearFlg)break;
+			m_clearFlg = true;
+			GoalManager::instance().CreateClearText();
+			GoalManager::instance().InformClear();
 		}
 		break;
 	case KdGameObject::ObjectType::MagneticArea:
@@ -793,6 +817,7 @@ void Player::OnHit(ObjectType _objType, const std::weak_ptr<KdGameObject>& _obj)
 	case KdGameObject::ObjectType::BigMovingWall:
 	{
 		
+		// プレイヤーをリフトに追従させる
 		if (_obj.lock()->GetUpdate())
 		{
 			m_pos += _obj.lock()->GetDistancePos();

@@ -1,6 +1,7 @@
 ﻿#include "MagneGun.h"
 #include"../../Character/Player/Player.h"
 #include"../Bullet/MaguneBullet/MaguneBullet.h"
+#include"../../Manager/GoalManager/GoalManager.h"
 #include"../../../Scene/SceneManager.h"
 
 const float MagneGun::k_grantScope = 400.f;
@@ -43,6 +44,12 @@ void MagneGun::Update()
 {
 	//更新フラグがfalseなら早期リターン
 	if (!m_updateFlg)return;
+
+	else if (GoalManager::instance().GetClearState())
+	{
+		// ゴールしたなら銃弾を打てなくする
+		m_shotFlg = true;
+	}
 
 	// プレイヤーの実態がないなら早期リターン
 	std::shared_ptr<Player> _spParent = m_parent.lock();

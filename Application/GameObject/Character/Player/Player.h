@@ -28,13 +28,14 @@ public:
 	// hpをセットする関数
 	void SetHp(const std::shared_ptr<HP>& _hp) { m_hp = _hp; }
 
-	void SetGravity(float _gravity) { m_gravity = _gravity; }
+	void SetGravity(const float _gravity) { m_gravity = _gravity; }
 
 	ObjectType GetObjType()override { return ObjectType::Player; }
 
 	// ゲームオーバー状態取得
 	const bool GetGameOver()const { return m_gameoverFlg; }
 
+	// プレイヤーがリフトの上に乗っているかどうか取得
 	const bool GetRideOn() const{ return m_rideOnFlg; }
 
 	const Math::Vector3 GetRotateAngle()const
@@ -91,6 +92,9 @@ private:
 	// 磁力エリアにいるかどうか判断する関数
 	void OnTheArea();
 
+	// 反発処理
+	void Repulsion();
+
 	// 影描画判断
 	void JudgmentShadow();
 	
@@ -123,13 +127,13 @@ private:
 	bool m_jumpKeyFlg = false;
 
 	//移動速度（ベクトルの大きさ）
-	float m_moveSpeed = 0.6f;
+	float m_moveSpeed = 0.0f;
 
 	//重力
 	float m_gravity = 0.0f;
 
 	// カメラ回転用マウス座標の差分
-	POINT m_FixMousePos = { 640,360 };
+	POINT m_FixMousePos = { 0,0 };
 
 	//磁力をまとう床の反発力
 	float m_repulsionPow = 0.0f;
@@ -146,7 +150,7 @@ private:
 	bool m_getOnJumpFlg = false;
 
 	//プレイヤーの復帰位置
-	Math::Vector3 m_returnPos = { 0,18,0};
+	Math::Vector3 m_returnPos;
 
 	//ゲームオーバー関連
 	std::weak_ptr<GameOver> m_gameover;
@@ -175,7 +179,7 @@ private:
 	Math::Vector3 m_shadowPos;
 
 	// 影のサイズ
-	float m_shadowSize = 13.0f;
+	float m_shadowSize = 0.0f;
 
 	// 影の行列
 	Math::Matrix m_shadowMat;
@@ -192,5 +196,6 @@ private:
 	// debug用の座標を読み込んで保存する変数
 	nlohmann::json m_debugData;
 
+	// プレイヤーがリフトの上に乗っているかどうか判断するフラグ
 	bool m_rideOnFlg = false;
 };
