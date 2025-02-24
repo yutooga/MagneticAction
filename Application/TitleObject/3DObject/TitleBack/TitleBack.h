@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include "../3DObjBase.h"
 
-class TitleBack : public KdGameObject
+class TitleBack : public _3DObjectBase
 {
 public:
 	TitleBack(){}
@@ -10,10 +11,5 @@ public:
 
 	void DrawUnLit()override;
 
-	static const float k_modelSize;	// モデルのサイズ
-
 private:
-
-	// モデルの実体
-	std::shared_ptr<KdModelWork> m_model;
 };

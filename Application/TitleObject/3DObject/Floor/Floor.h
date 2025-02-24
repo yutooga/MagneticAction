@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include "../3DObjBase.h"
 
-class Floor : public KdGameObject
+class Floor : public _3DObjectBase
 {
 public:
 	Floor(){}
@@ -8,10 +9,6 @@ public:
 
 	void Init()override;
 
-	void DrawLit()override;
-
 private:
 
-	// モデルの実体
-	std::shared_ptr<KdModelWork> m_model;
 };

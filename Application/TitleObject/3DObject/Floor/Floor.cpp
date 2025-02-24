@@ -6,16 +6,16 @@ void Floor::Init()
 	if(!m_model)
 	{
 		m_model = std::make_shared<KdModelWork>();
-		m_model->SetModelData("Asset/Models/Title/Floor/Floor.gltf");
+		m_model->SetModelData(m_jsonData["Floor"]["URL"]);
 	}
 
-	// 行列の確定
-	Math::Matrix transMat = Math::Matrix::CreateTranslation(0, -2.0, 0);
-	Math::Matrix scaleMat = Math::Matrix::CreateScale(1.0f);
-	m_mWorld = scaleMat * transMat;
-}
+	// モデルの表示座標
+	m_pos = { m_jsonData["Floor"]["Pos"].value("X",0.f),
+		m_jsonData["Floor"]["Pos"].value("Y",-2.f),m_jsonData["Floor"]["Pos"].value("Z",0.f)
+	};
 
-void Floor::DrawLit()
-{
-	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
+	// 行列の確定
+	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
+	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_jsonData["Floor"].value("ModelSize", 1.f));
+	m_mWorld = scaleMat * transMat;
 }
