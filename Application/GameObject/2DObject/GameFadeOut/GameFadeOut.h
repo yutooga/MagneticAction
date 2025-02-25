@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include"../2DGameObjBase.h"
 
-class GameFadeOut : public KdGameObject
+class GameFadeOut : public _2DGameObjBase
 {
 public:
 	GameFadeOut(){}
@@ -15,16 +16,4 @@ public:
 	static const float k_reduceAlphaAmount;	// 画像の透明度の減算量
 
 private:
-
-	// 画像の実体
-	KdTexture m_tex;
-
-	// 透明度
-	float m_alpha = 1.0f;
-
-	// 画像の色
-	Math::Color color = { 1,1,1,m_alpha };
-
-	// 画像の切り取り範囲
-	Math::Rectangle rc = { 0,0,1280,720 };
 };

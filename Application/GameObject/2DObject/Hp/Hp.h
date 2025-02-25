@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include"../2DGameObjBase.h"
 
-class HP : public KdGameObject
+class HP : public _2DGameObjBase
 {
 public:
 	HP(){}
@@ -24,25 +25,23 @@ public:
 	static const float k_tremorSpeed;	// 揺れの速さ
 	static const float k_tremorRange;	// 揺れ幅
 	static const float k_tremorLimit;	// 揺れの限界値
-	const Math::Vector3 k_firstPos = { -400, 300, 0 };	// 最初の座標
-	const Math::Vector3 k_scale = { 6.0f,1.0f,1.0f };	// 最初の座標
 
 	//==============================================================
 
 private:
 
-	// 画像の実体
-	KdTexture m_tex;
+	// ハートが揺れる処理
+	void ShakeHeart();
 
 	//現在のHP数
-	int m_nowHp = 6;
+	int m_nowHp = 0;
 
 	// ダメージを受けたかどうか判断するフラグ
 	bool m_damageFlg = false;
 
-	// 画像の座標
-	Math::Vector3 m_pos;
-
 	// ハートが揺れる時間
 	float m_time = 0.0f;
+
+	// 画像の大きさ
+	Math::Vector3 m_scale;
 };

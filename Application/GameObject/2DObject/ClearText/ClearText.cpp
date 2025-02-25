@@ -6,13 +6,18 @@ const float ClearText::k_addAlphaAmount = 0.05f;
 void ClearText::Init()
 {
 	// 画像のロード
-	m_tex.Load("Asset/Textures/Scene/GameScene/2DObject/ClearText/ClearText.png");
+	m_tex.Load(m_jsonData["ClearText"]["URL"]);
 
 	// 画像のサイズの初期化
-	m_textSize = 5.0f;
+	m_size = m_jsonData["ClearText"].value("TextureSize", 5.f);
 
 	// 座標の初期化
-	m_pos = { 5,140,0 };
+	m_pos = { m_jsonData["ClearText"]["Pos"].value("X", 5.f),
+		m_jsonData["ClearText"]["Pos"].value("Y", 140.f),0};
+
+	// 切り取り範囲の初期化
+	m_rc = { 0,0, m_jsonData["ClearText"]["Rc"].value("X", 237),
+		m_jsonData["ClearText"]["Rc"].value("Y", 88) };
 }
 
 void ClearText::Update()
@@ -30,25 +35,24 @@ void ClearText::Update()
 	}
 
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
-	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_textSize);
+	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_size);
 	m_mWorld = scaleMat * transMat;
 }
 
 void ClearText::DrawSprite()
 {
 	KdShaderManager::Instance().m_spriteShader.SetMatrix(m_mWorld);
-	Math::Rectangle rc = { 0,0,237,88 };
 	Math::Color color = { 1,1,1,m_alpha };
-	KdShaderManager::Instance().m_spriteShader.DrawTex(&m_tex, 0, 0, &rc, &color);
+	KdShaderManager::Instance().m_spriteShader.DrawTex(&m_tex, 0, 0, &m_rc, &color);
 	KdShaderManager::Instance().m_spriteShader.SetMatrix(Math::Matrix::Identity);
 }
 
 void ClearText::DrawImGui()
 {
-	if (ImGui::CollapsingHeader("clear", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader("ClearText", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::DragFloat("clear m_posX", &m_pos.x, 0.1f);
-		ImGui::DragFloat("clear m_posY", &m_pos.y, 0.1f);
-		ImGui::DragFloat("clear size", &m_textSize, 0.1f);
+		ImGui::DragFloat("ClearText m_posX", &m_pos.x, 0.1f);
+		ImGui::DragFloat("ClearText m_posY", &m_pos.y, 0.1f);
+		ImGui::DragFloat("ClearText size", &m_size, 0.1f);
 	}
 }

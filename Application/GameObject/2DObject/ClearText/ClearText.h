@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include"../2DGameObjBase.h"
 
-class ClearText : public KdGameObject
+class ClearText : public _2DGameObjBase
 {
 public:
 	ClearText(){}
@@ -23,15 +24,4 @@ public:
 
 private:
 
-	// 画像の実体
-	KdTexture m_tex;
-
-	// 表示座標
-	Math::Vector3 m_pos;
-
-	// 画像のサイズ
-	float m_textSize = 1.0f;
-
-	// 透明度
-	float m_alpha = 0.0f;
 };

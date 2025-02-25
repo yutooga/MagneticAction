@@ -58,7 +58,8 @@ private :
 
 	// 現在のシーンの種類を保持している変数
 	//SceneType m_currentSceneType = SceneType::Result;
-	SceneType m_currentSceneType = SceneType::Game;
+	SceneType m_currentSceneType = SceneType::Title;
+	//SceneType m_currentSceneType = SceneType::Game;
 	
 	// 次のシーンの種類を保持している変数
 	SceneType m_nextSceneType = m_currentSceneType;

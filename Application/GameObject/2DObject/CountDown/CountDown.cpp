@@ -2,51 +2,68 @@
 #include"../../Manager/StartManager/StartManager.h"
 
 const float CountDown::k_reduceAmount = 0.1f;
-const float CountDown::k_textNormalSize = 1.0f;
 
 void CountDown::Init()
 {
 	// 各画像の読み込み&切り取り範囲の初期化
-	std::shared_ptr<KdTexture> three = std::make_shared<KdTexture>();
-	three->Load("Asset/Textures/Scene/GameScene/2DObject/CountDown/Three.png");
-	m_number.push_back(three);
 
-	Math::Rectangle rc3 = { 0,0,150,224 };
-	m_rect.push_back(rc3);
+	{
+		std::shared_ptr<KdTexture> three = std::make_shared<KdTexture>();
+		three->Load(m_jsonData["CountDown"]["Three"]["URL"]);
+		m_number.push_back(three);
+	}
 
-	std::shared_ptr<KdTexture> two = std::make_shared<KdTexture>();
-	two->Load("Asset/Textures/Scene/GameScene/2DObject/CountDown/Two.png");
-	m_number.push_back(two);
+	{
+		Math::Rectangle rc3 = { 0,0,
+			m_jsonData["CountDown"]["Three"]["Rc"].value("X",150),
+			m_jsonData["CountDown"]["Three"]["Rc"].value("Y",224) };
+		m_rect.push_back(rc3);
+	}
 
-	Math::Rectangle rc2 = { 0,0,174,224 };
-	m_rect.push_back(rc2);
+	{
+		std::shared_ptr<KdTexture> two = std::make_shared<KdTexture>();
+		two->Load(m_jsonData["CountDown"]["Two"]["URL"]);
+		m_number.push_back(two);
+	}
 
-	std::shared_ptr<KdTexture> one = std::make_shared<KdTexture>();
-	one->Load("Asset/Textures/Scene/GameScene/2DObject/CountDown/One.png");
-	m_number.push_back(one);
+	{
+		Math::Rectangle rc2 = { 0,0,
+			m_jsonData["CountDown"]["Two"]["Rc"].value("X",174),
+			m_jsonData["CountDown"]["Two"]["Rc"].value("Y",224) };
+		m_rect.push_back(rc2);
+	}
 
-	Math::Rectangle rc1 = { 0,0,108,224 };
-	m_rect.push_back(rc1);
+	{
+		std::shared_ptr<KdTexture> one = std::make_shared<KdTexture>();
+		one->Load(m_jsonData["CountDown"]["One"]["URL"]);
+		m_number.push_back(one);
+	}
 
-	std::shared_ptr<KdTexture> start = std::make_shared<KdTexture>();
-	start->Load("Asset/Textures/Scene/GameScene/2DObject/CountDown/START.png");
-	m_number.push_back(start);
+	{
+		Math::Rectangle rc1 = { 0,0,
+			m_jsonData["CountDown"]["One"]["Rc"].value("X",108),
+			m_jsonData["CountDown"]["One"]["Rc"].value("Y",224) };
+		m_rect.push_back(rc1);
+	}
 
-	Math::Rectangle rcStart = { 0,0,734,226 };
-	m_rect.push_back(rcStart);
+	{
+		std::shared_ptr<KdTexture> start = std::make_shared<KdTexture>();
+		start->Load(m_jsonData["CountDown"]["Start"]["URL"]);
+		m_number.push_back(start);
+	}
+
+	{
+		Math::Rectangle rcStart = { 0,0,
+			m_jsonData["CountDown"]["Start"]["Rc"].value("X",734),
+			m_jsonData["CountDown"]["Start"]["Rc"].value("Y",226) };
+		m_rect.push_back(rcStart);
+	}
 }
 
 void CountDown::Update()
 {
-	//サイズが０になったら次の画像にする
-	if (m_size <= 0)
-	{
-		// 各パラメータの初期化
-		m_changeCnt = 0.0f;
-		m_size = k_textNormalSize;
-		m_angle = 0.0f;
-		m_nowTextureCnt++;
-	}
+	// 画像の切り替え処理
+	ChangeTexture();
 
 	// SE再生フラグがONなら鳴らす
 	if (!m_seFlg)
@@ -64,6 +81,40 @@ void CountDown::Update()
 		return;
 	}
 
+	// 画像の回転処理
+	RotationTexture();
+
+	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_size);
+	Math::Matrix rotMat = Math::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(m_angle));
+	m_mWorld = scaleMat * rotMat;
+}
+
+void CountDown::DrawSprite()
+{
+	// 画像の更新終了しているなら描画しない
+	if (m_endFlg)return;
+
+	KdShaderManager::Instance().m_spriteShader.SetMatrix(m_mWorld);
+	KdShaderManager::Instance().m_spriteShader.DrawTex(m_number[m_nowTextureCnt], 0, 0, &m_rect[m_nowTextureCnt]);
+	KdShaderManager::Instance().m_spriteShader.SetMatrix(Math::Matrix::Identity);
+}
+
+void CountDown::ChangeTexture()
+{
+	
+	if (m_size > 0)return;
+
+	//サイズが０になったら次の画像にする
+
+	// 各パラメータの初期化
+	m_changeCnt = 0.0f;
+	m_size = m_jsonData["CountDown"].value("TextureSize", 1.0f);
+	m_angle = 0.0f;
+	m_nowTextureCnt++;
+}
+
+void CountDown::RotationTexture()
+{
 	// 次の画像に切り替わるまでのクールタイム
 	if (m_changeCnt < k_changeCoolTime)
 	{
@@ -83,18 +134,4 @@ void CountDown::Update()
 		// 画像の縮小処理
 		m_size -= k_reduceAmount;
 	}
-
-	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_size);
-	Math::Matrix rotMat = Math::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(m_angle));
-	m_mWorld = scaleMat * rotMat;
-}
-
-void CountDown::DrawSprite()
-{
-	// 画像の更新終了しているなら描画しない
-	if (m_endFlg)return;
-
-	KdShaderManager::Instance().m_spriteShader.SetMatrix(m_mWorld);
-	KdShaderManager::Instance().m_spriteShader.DrawTex(m_number[m_nowTextureCnt], 0, 0, &m_rect[m_nowTextureCnt]);
-	KdShaderManager::Instance().m_spriteShader.SetMatrix(Math::Matrix::Identity);
 }

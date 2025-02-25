@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include"../2DGameObjBase.h"
 
-class GameFadeIn : public  KdGameObject
+class GameFadeIn : public  _2DGameObjBase
 {
 public:
 	GameFadeIn(){}
@@ -17,13 +18,4 @@ public:
 
 private:
 
-	// 画像の実体
-	KdTexture m_tex;
-
-	// 透明度
-	float m_alpha = 0.0f;
-
-	// 画像の切り取り範囲
-	Math::Rectangle m_rc = { 0,0,1280,720 };
-	Math::Color m_color = { 1,1,1,m_alpha };
 };

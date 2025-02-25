@@ -6,7 +6,17 @@ const float GameFadeIn::k_addAlphaAmount = 0.01f;
 void GameFadeIn::Init()
 {
 	// 画像のロード
-	m_tex.Load("Asset/Textures/Scene/GameScene/2DObject/GameFadeOut/Brack.png");
+	m_tex.Load(m_jsonData["GameFadeIn"]["URL"]);
+
+	// 画像の切り取り範囲の初期化
+	m_rc = { 0,0,
+		m_jsonData["GameFadeIn"]["Rc"].value("X",1280),
+		m_jsonData["GameFadeIn"]["Rc"].value("Y",720) };
+
+	// 透明度の初期化&色の初期化
+	m_color = { m_jsonData["GameFadeIn"].value("RgbMax",1.f),
+		m_jsonData["GameFadeIn"].value("RgbMax",1.f),
+		m_jsonData["GameFadeIn"].value("RgbMax",1.f),m_alpha };
 }
 
 void GameFadeIn::DrawSprite()
@@ -29,5 +39,7 @@ void GameFadeIn::Update()
 	}
 
 	// 色の更新
-	m_color = { 1,1,1,m_alpha };
+	m_color = { m_jsonData["GameFadeIn"].value("RgbMax",1.f),
+		m_jsonData["GameFadeIn"].value("RgbMax",1.f),
+		m_jsonData["GameFadeIn"].value("RgbMax",1.f),m_alpha };
 }

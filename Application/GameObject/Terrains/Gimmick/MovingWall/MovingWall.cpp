@@ -290,7 +290,7 @@ void MovingWall::BigSize::Enter(MovingWall& owner)
 	if (!owner.m_model)
 	{
 		owner.m_model = std::make_shared<KdModelWork>();
-		owner.m_model->SetModelData("Asset/Models/Terrains/Gimmick/MovingWall2/MovingWall2.gltf");
+		owner.m_model->SetModelData("Asset/Models/Terrains/Gimmick/BigMovingWall/MovingWall2.gltf");
 	}
 
 	owner.m_angle = 0.0f;
