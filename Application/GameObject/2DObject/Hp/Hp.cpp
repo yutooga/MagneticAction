@@ -62,7 +62,7 @@ void HP::DecreaseHp()
 	m_damageFlg = true;
 
 	// SE再生
-	KdAudioManager::Instance().Play("Asset/Sounds/GameScene/2DObject/Hp/Damage.wav", false);
+	KdAudioManager::Instance().Play(m_jsonData["Hp"]["Se"]["URL"], false);
 }
 
 void HP::ShakeHeart()

@@ -6,9 +6,13 @@ nlohmann::json TerrainsBase::m_gimmickData;
 
 TerrainsBase::TerrainsBase()
 {
-	std::ifstream ifs("Asset/Data/Gimmick/GimmickParamData/GimmickParamData.json");
-	if (ifs) {
-		ifs >> m_gimmickData;
+	// jsonファイルの読み込み
+	if (m_gimmickData.empty())
+	{
+		std::ifstream ifs("Asset/Data/GameScene/3DObject/Terrains/Gimmick/GimmickParamData/GimmickParamData.json");
+		if (ifs) {
+			ifs >> m_gimmickData;
+		}
 	}
 
 	m_randomId = rand();

@@ -650,7 +650,7 @@ void Player::GameOverPlayer()
 		// 音関係を全て止める
 		KdAudioManager::Instance().StopAllSound();
 		// ゲームオーバーのSEを流す
-		KdAudioManager::Instance().Play("Asset/Sounds/GameScene/2DObject/GameOver/GameOver.wav");
+		KdAudioManager::Instance().Play("Asset/Sounds/GameScene/SE/2DObject/GameOver/GameOver.wav");
 	}
 }
 

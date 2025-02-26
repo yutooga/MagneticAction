@@ -5,7 +5,7 @@ class Ground : public TerrainsBase
 {
 public:
 	Ground(){}
-	~Ground(){}
+	~Ground()override{}
 
 	void Init()override;
 

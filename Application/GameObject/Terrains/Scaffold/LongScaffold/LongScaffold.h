@@ -33,8 +33,8 @@ public:
 private:
 
 	// 補正値
-	float m_adjustWidth = 90.0f;
+	float m_adjustWidth = 0.0f;
 
 	// 回転角度
-	float m_rotAngle = 90.0f;
+	float m_rotAngle = 0.0f;
 };

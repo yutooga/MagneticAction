@@ -32,5 +32,6 @@ private:
 	// 現在の状態の保存関数
 	Option m_nowMode = Option::None;
 
+	// リザルト画面で使用する際の回転角度
 	float m_angle = 0.0f;
 };

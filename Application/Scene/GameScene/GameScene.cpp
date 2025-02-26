@@ -24,7 +24,7 @@
 #include"../../GameObject/Terrains/Gimmick/Goal/Goal.h"
 #include"../../GameObject/Terrains/Gimmick/Gate/Gate.h"
 #include"../../GameObject/Terrains/Gimmick/GateWall/GateWall.h"
-#include"../../GameObject/Terrains/Gimmick/MoveMaguneFloor/MoveMaguneFloor.h"
+#include"../../GameObject/Terrains/Gimmick/Floor/MoveMagneFloor/MoveMagneFloor.h"
 #include"../../GameObject/Terrains/Gimmick/Ramparts/Ramparts.h"
 #include"../../GameObject/Terrains/Gimmick/MagneticFloor/MagneticFloor.h"
 #include"../../GameObject/Terrains/Gimmick/MaguneWall/MaguneWall.h"
@@ -106,7 +106,7 @@ void GameScene::Update()
 				m_pushFlg = true;
 				if (!m_pauseFlg)
 				{
-					KdAudioManager::Instance().Play("Asset/Sounds/GameScene/2DObject/Pause/open.wav", false);
+					KdAudioManager::Instance().Play("Asset/Sounds/GameScene/SE/2DObject/Pause/open.wav", false);
 
 					m_pauseFlg = true;
 					std::shared_ptr<Pause> pause = std::make_shared<Pause>();
@@ -691,8 +691,8 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				//=====================================
 				std::shared_ptr<LongScaffold> scaffold = std::make_shared<LongScaffold>();
 				scaffold->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				scaffold->SetWidth(row[8]);
 				scaffold->Init();
+				scaffold->SetWidth(row[8]);
 				m_objList.push_back(scaffold);
 				break;
 			}
@@ -784,9 +784,9 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				//=====================================
 				std::shared_ptr<LongScaffold> scaffold = std::make_shared<LongScaffold>();
 				scaffold->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
+				scaffold->Init();
 				scaffold->SetWidth(row[8]);
 				scaffold->SetRotAngle(row[5]);
-				scaffold->Init();
 				m_objList.push_back(scaffold);
 				break;
 			}
@@ -906,11 +906,11 @@ void GameScene::LoadMoveFloorGimmickParam(const std::string& _filePath)
 				//=====================================
 				// 動く足場床初期化(S極)
 				//=====================================
-				std::shared_ptr<MoveMaguneFloor> floor = std::make_shared<MoveMaguneFloor>();
+				std::shared_ptr<MoveMagneFloor> floor = std::make_shared<MoveMagneFloor>();
 				floor->Init();
 				floor->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				floor->SetMoveMax(static_cast<int>(row[4]));
-				floor->SetMaguneState(MoveMaguneFloor::MoveState::nomal);
+				floor->SetMaguneState(MoveMagneFloor::MoveState::nomal);
 				floor->SetObjType(KdGameObject::ObjectType::MoveMagneFloorNomalVer);
 				m_objList.push_back(floor);
 				break;
@@ -920,13 +920,13 @@ void GameScene::LoadMoveFloorGimmickParam(const std::string& _filePath)
 				//=====================================
 				// 動く足場床初期化
 				//=====================================
-				std::shared_ptr<MoveMaguneFloor> floor = std::make_shared<MoveMaguneFloor>();
+				std::shared_ptr<MoveMagneFloor> floor = std::make_shared<MoveMagneFloor>();
 				floor->Init();
 				floor->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				floor->SetMoveMax(static_cast<int>(row[4]));
 				floor->SetKeyObj(static_cast<int>(row[5]));
 				floor->SetMaguneForce(static_cast<int>(row[6]));
-				floor->SetMaguneState(MoveMaguneFloor::MoveState::special);
+				floor->SetMaguneState(MoveMagneFloor::MoveState::special);
 				floor->SetObjType(KdGameObject::ObjectType::MoveMagunet);
 				m_objList.push_back(floor);
 				break;

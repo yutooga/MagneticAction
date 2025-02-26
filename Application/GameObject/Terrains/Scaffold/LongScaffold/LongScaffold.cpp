@@ -1,4 +1,5 @@
 ﻿#include "LongScaffold.h"
+#include"../../../../Manager/ModelManager/ModelManager.h"
 
 const float LongScaffold::k_modelSize = 15.0f;
 const float LongScaffold::k_defaultRotAngle = 90.f;
@@ -8,9 +9,14 @@ void LongScaffold::Init()
 	// モデルの読み込み
 	if(!m_model)
 	{
-		m_model = std::make_shared<KdModelWork>();
-		m_model->SetModelData("Asset/Models/Terrains/Scaffold/LongScaffold/LongScaffold.gltf");
+		m_model = ModelManager::Instance().GetModel("LongScaffold");
 	}
+
+	// 補正値の初期化
+	m_adjustWidth = m_gimmickData["LongScaffold"].value("AdjustWidth", 90.0f);
+
+	// 回転角度の初期化
+	m_rotAngle = m_gimmickData["LongScaffold"].value("Angle", 90.0f);
 
 	// ImGui用のランダムなIdの生成
 	m_randomId = rand();

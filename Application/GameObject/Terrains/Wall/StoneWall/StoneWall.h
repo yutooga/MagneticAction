@@ -19,7 +19,7 @@ public:
 	void SetModelSize(const float _size) { m_modelSize = _size; }
 
 	// 回転角度設定関数
-	void SetAngle(const float _angle = 0.0f) { m_angle = _angle; }
+	void SetAngle(const float _angle) { m_angle = _angle; }
 
 private:
 

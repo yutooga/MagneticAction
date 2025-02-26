@@ -68,7 +68,7 @@ void CountDown::Update()
 	// SE再生フラグがONなら鳴らす
 	if (!m_seFlg)
 	{
-		KdAudioManager::Instance().Play("Asset/Sounds/GameScene/2DObject/CountDown/CountDown.wav",false);
+		KdAudioManager::Instance().Play(m_jsonData["CountDown"]["Se"]["URL"],false);
 		m_seFlg = true;
 	}
 

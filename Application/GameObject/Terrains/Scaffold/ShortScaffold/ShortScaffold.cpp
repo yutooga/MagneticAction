@@ -1,13 +1,16 @@
 ﻿#include "ShortScaffold.h"
+#include"../../../../Manager/ModelManager/ModelManager.h"
 
 void ShortScaffold::Init()
 {
 	// モデルの読み込み
 	if(!m_model)
 	{
-		m_model = std::make_shared<KdModelWork>();
-		m_model->SetModelData("Asset/Models/Terrains/Scaffold/ShortScaffold/ShortScaffold.gltf");
+		m_model = ModelManager::Instance().GetModel("ShortScaffold");
 	}
+
+	// モデルの大きさの初期化
+	m_modelSize = m_gimmickData["ShortScaffold"].value("ModelSize", 5.0f);
 
 	//ImGui用のランダムなIdの生成
 	m_randomId = rand();
