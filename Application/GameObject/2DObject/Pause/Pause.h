@@ -1,17 +1,18 @@
 ﻿#pragma once
+#include"../2DGameObjBase.h"
 
-class Pause : public KdGameObject
+class Pause : public _2DGameObjBase
 {
 public:
 	Pause(){}
-	~Pause() { Release(); }
+	~Pause()override{ Release(); }
 
 	// 選択状態
 	enum class State
 	{
-		NotSelect = 1,	// 何も選択されていない状態
-		Title = 1 << 1,	// タイトルを選択している状態
-		Quit = 1 << 2	// やめるを選択している状態
+		NotSelect,	// 何も選択されていない状態
+		Title,	// タイトルを選択している状態
+		Quit 	// やめるを選択している状態
 	};
 
 	std::unordered_map<std::string, float> TextureSize = {
@@ -28,10 +29,10 @@ public:
 
 private:
 
-	void Release();
+	void Release()override;
 
-	//テキスト画像
-	KdTexture m_textTex;
+	// 選択している項目を切り替える関数
+	void ChangeSelectState();
 
 	//背景画像
 	KdTexture m_backTex;
@@ -44,11 +45,18 @@ private:
 	KdTexture m_quitTextTex;
 	Math::Matrix m_quitTextMat;
 
+	// 画像の切り取り範囲
+	Math::Rectangle m_titleRc;
+	Math::Rectangle m_quitRc;
+
 	//今の状態を管理する変数
 	State m_nowState = State::NotSelect;
+
+	// 前の状態を管理する変数
+	State m_previousState = State::NotSelect;
 
 	// 押しっぱ防止フラグ
 	bool m_pushEnterFlg = false;
 
-	bool m_pushPFlg = true;
+	bool m_pushPKeyFlg = true;
 };

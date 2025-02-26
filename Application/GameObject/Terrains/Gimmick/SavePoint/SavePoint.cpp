@@ -72,6 +72,8 @@ void SavePoint::SavePoint_Player()
 	//当たり判定をしたいタイプを設定
 	sphere.m_type = KdCollider::TypeSight;
 
+	//m_pDebugWire->AddDebugSphere(sphere.m_sphere.Center, sphere.m_sphere.Radius);
+
 	//当たり判定
 	for (auto& obj : SceneManager::Instance().GetObjList())
 	{

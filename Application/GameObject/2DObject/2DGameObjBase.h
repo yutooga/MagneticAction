@@ -4,8 +4,10 @@ class _2DGameObjBase : public KdGameObject
 {
 public:
 	_2DGameObjBase();
-	~_2DGameObjBase()override {}
+	~_2DGameObjBase()override { Release(); }
 protected:
+
+	virtual void Release() { m_tex.Release(); }
 
 	// 画像の実体
 	KdTexture m_tex;

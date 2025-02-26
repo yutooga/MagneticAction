@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include"../2DGameObjBase.h"
 
-class MagunePower : public KdGameObject
+class MagunePower : public _2DGameObjBase
 {
 public:
 	MagunePower(){}
@@ -23,8 +24,6 @@ public:
 	static const float k_rotAngleMax;	// 回転角度の限界
 	static const float k_addEffectCnt;	// エフェクトの更新カウント加算量
 
-private:
-
 	enum class RotationDirection
 	{
 		Rightturn = 1,
@@ -32,6 +31,8 @@ private:
 		Noturn = 1 << 2,
 		Finish = 1 << 3
 	};
+
+private:
 
 	// 画像の切り取り範囲更新関数
 	void EffectRcUpdate();
@@ -56,12 +57,9 @@ private:
 	// プレイヤーの現在まとっている磁極
 	UINT m_nowPower = NoForce;
 
-	// 画像の座標
-	Math::Vector3 m_texturePos = Math::Vector3::Zero;
-
 	// 画像のサイズ
-	float m_powerTexSize = -0.25f;
-	float m_effectTexSize = 0.6f;
+	float m_powerSize = 0.f;
+	float m_effectSize = 0.f;
 
 	// エフェクト画像の切り取り範囲
 	Math::Rectangle m_effcRc;
@@ -78,11 +76,8 @@ private:
 	// テキスト回転更新フラグ
 	RotationDirection m_textRotFlg = RotationDirection::Noturn;
 
-	// テキストの回転角度
-	int m_angle = 0;
-
 	// 回転速度
-	int RotSpeed = 9;
+	int m_rotSpeed = 0;
 
 	//行列
 	Math::Matrix m_powerMat = Math::Matrix::Identity;
