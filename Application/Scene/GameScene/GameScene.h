@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include"../BaseScene/BaseScene.h"
-#include"../../GameObject/Terrains/Gimmick/DeathFloor/DeathFloor.h"
+#include"../../GameObject/Terrains/Gimmick/Floor/DeathFloor/DeathFloor.h"
 
 class KdGameObject;
 class HP;

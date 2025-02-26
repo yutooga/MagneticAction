@@ -1,8 +1,7 @@
 ﻿#include "DeathFloor.h"
-#include"../../../../Scene/SceneManager.h"
-#include"../../../../Manager/ModelManager/ModelManager.h"
+#include"../../../../../Scene/SceneManager.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
 
-const float DeathFloor::k_modelSize = 8.f;
 const float DeathFloor::k_oppositionLimit = 30.f;
 const float DeathFloor::k_oppositionPow = 0.5f;
 const float DeathFloor::k_correctionValue = 0.2f;
@@ -11,6 +10,7 @@ const float DeathFloor::k_sameForceColisionRadius = 80.f;
 const float DeathFloor::k_differentForceColisionRadius = 100.f;
 const float DeathFloor::k_opppsitionSpeed = 0.3f;
 const float DeathFloor::k_adsorptionSpeed = 0.4f;
+const float DeathFloor::k_unitVector = 1.f;
 
 void DeathFloor::Init()
 {
@@ -21,7 +21,16 @@ void DeathFloor::Init()
 	}
 
 	// モデルの大きさの初期化
-	m_modelSize = k_modelSize;
+	m_modelSize = m_gimmickData["DeathFloor"].value("ModelSize", 8.f);
+
+	// 移動スピードの初期化
+	m_moveSpeed = m_gimmickData["DeathFloor"].value("MoveSpeed", 0.5f);
+
+	// 長さ初期化
+	m_length = m_gimmickData["DeathFloor"].value("Length", 40.f);
+
+	// 振れ幅初期化
+	m_amplitude = m_gimmickData["DeathFloor"].value("Amplitude", 3.f);
 
 	// デバックラインの実態生成
 	m_pDebugWire = std::make_unique<KdDebugWireFrame>();
@@ -187,8 +196,6 @@ void DeathFloor::MaguneScope()
 	}
 	//当たり判定をしたいタイプを設定
 	sphere.m_type = KdCollider::TypeSight;
-	//デバック用
-	//m_pDebugWire->AddDebugSphere(sphere.m_sphere.Center, sphere.m_sphere.Radius);
 
 	//当たり判定
 	for (auto& obj : SceneManager::Instance().GetObjList())
@@ -228,13 +235,13 @@ void DeathFloor::PlayerReaction()
 		if (oppCount == 0)
 		{
 			//反発SE再生
-			KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/Repulsion.wav", false);
+			KdAudioManager::Instance().Play(m_gimmickData["Se"]["Repulsion"]["URL"], false);
 		}
 
 		moveDir = m_obj.lock()->GetPos() - m_pos;
 
 		// 地面にめり込まないようにする
-		if (moveDir.y <= -1.f)
+		if (moveDir.y <= -k_unitVector)
 		{
 			moveDir.y = 0.0f;
 		}
@@ -267,11 +274,14 @@ void DeathFloor::PlayerReaction()
 
 void DeathFloor::OnHit(Math::Vector3 _pos, UINT _maguneForce, const ObjectType& _type)
 {
+	// 移動方向
+	Math::Vector3 moveDir;
+
 	//自分と相手が同じ極の磁力をまとっているとき
 	if (m_maguneForce == _maguneForce)
 	{
 
-		Math::Vector3 moveDir = m_pos - _pos;
+		moveDir = m_pos - _pos;
 
 		// HITしたオブジェクトが磁力の床の場合Y方向以外０にする
 		if (_type == ObjectType::ChangeFloor)
@@ -282,10 +292,6 @@ void DeathFloor::OnHit(Math::Vector3 _pos, UINT _maguneForce, const ObjectType& 
 
 		// 速さの初期化
 		m_moveSpeed = k_opppsitionSpeed;
-
-		moveDir.Normalize();
-
-		m_pos += moveDir * m_moveSpeed;
 	}
 	//違う極をまとっているとき
 	else if (m_maguneForce != _maguneForce)
@@ -293,28 +299,31 @@ void DeathFloor::OnHit(Math::Vector3 _pos, UINT _maguneForce, const ObjectType& 
 		// 速さの初期化
 		m_moveSpeed = k_adsorptionSpeed;
 
-		Math::Vector3 moveDir = m_firstPos - m_pos;
+		moveDir = m_firstPos - m_pos;
 		if (moveDir.Length() < m_moveSpeed + k_correctionValue)m_moveSpeed = 0;
-		moveDir.Normalize();
-
-		m_pos += moveDir * m_moveSpeed;
 	}
+
+	moveDir.Normalize();
+	m_pos += moveDir * m_moveSpeed;
 }
 
-void DeathFloor::OnHit(Math::Vector3 _pos)
+void DeathFloor::OnHit(Math::Vector3& _pos)
 {
 	m_attractFlg = true;
 }
 
 void DeathFloor::ChangeMoveState(MoveState state)
 {
-	if (state == MoveState::nomal)
+	switch (state)
 	{
+	case DeathFloor::MoveState::nomal:
 		SetMoveState(std::make_shared<DeathFloor::NormalMove>());
-	}
-	else if (state == MoveState::change)
-	{
+		break;
+	case DeathFloor::MoveState::change:
 		SetMoveState(std::make_shared<DeathFloor::ChangeMove>());
+		break;
+	default:
+		break;
 	}
 
 	m_nowMoveState = state;
@@ -346,7 +355,7 @@ void DeathFloor::NormalMove::PostUpdate(DeathFloor& owner)
 	//同じ極の磁力をまとった壁同士の当たり判定
 	owner.ColisionCheck(k_sameForceColisionRadius, ColisionOption::SameForce, hitChangeFloors);
 
-	float range = 1000000;
+	float range = m_gimmickData["DeathFloor"].value("Range", 1000000.f);
 	Math::Vector3 targetPos;
 	UINT force;
 	ObjectType type;
@@ -390,7 +399,7 @@ void DeathFloor::ChangeMove::Update(DeathFloor& owner)
 	{
 		owner.m_moveAngle -= k_rotAngleMax;
 	}
-	owner.m_pos.x += sin(DirectX::XMConvertToRadians(owner.m_moveAngle))*3;
+	owner.m_pos.x += sin(DirectX::XMConvertToRadians(owner.m_moveAngle)) * owner.m_amplitude;
 }
 
 void DeathFloor::ChangeMove::PostUpdate(DeathFloor& owner)

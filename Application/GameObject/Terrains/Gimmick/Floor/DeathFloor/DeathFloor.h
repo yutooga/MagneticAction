@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"../MaguneFloorBase/MaguneFloorBase.h"
+#include"../../MaguneFloorBase/MaguneFloorBase.h"
 
 class DeathFloor : public MagneFloorBase
 {
@@ -30,8 +30,6 @@ public:
 
 	//====================================================================
 
-	static const float k_modelSize;	// モデルの大きさ
-
 	static const float k_oppositionLimit;	// 反発の継続時間の限界
 
 	static const float k_oppositionPow;	// 反発の大きさ
@@ -49,6 +47,8 @@ public:
 	static const float k_opppsitionSpeed;	// 反発の時の移動スピード
 
 	static const float k_adsorptionSpeed;	// 引き寄せあっているときの移動スピード
+
+	static const float k_unitVector;	// 単位ベクトル
 
 	//====================================================================
 
@@ -72,10 +72,10 @@ private:
 
 	// 当たられた時の判定処理
 	void OnHit(Math::Vector3 _pos, UINT _maguneForce,const ObjectType& _type);
-	void OnHit(Math::Vector3 _pos);
+	void OnHit(Math::Vector3& _pos);
 
 	// 動く速さ
-	float m_moveSpeed = 0.5f;
+	float m_moveSpeed = 0.f;
 
 	// モデルの大きさ
 	float m_modelSize = 0.0f;
@@ -96,7 +96,10 @@ private:
 	//移動する前の位置
 	Math::Vector3 m_previousPosition;
 
-	float m_length = 40.0f;
+	float m_length = 0.0f;
+
+	// 角度の振れ幅
+	float m_amplitude = 0.0f;
 
 private:
 
