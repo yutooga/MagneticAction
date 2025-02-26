@@ -17,7 +17,7 @@
 #include"../../GameObject/Terrains/Gimmick/MovingWall/MovingWall.h"
 #include"../../GameObject/Terrains/Gimmick/JumpingMagnet/JumpingMagnet.h"
 #include"../../GameObject/Terrains/Gimmick/MagicRing/MagicRing.h"
-#include"../../GameObject/Terrains/Gimmick/ChangeFloor/ChangeFloor.h"
+#include"../../GameObject/Terrains/Gimmick/Floor/ChangeFloor/ChangeFloor.h"
 #include"../../GameObject/Terrains/Scaffold/ShortScaffold/ShortScaffold.h"
 #include"../../GameObject/Terrains/Scaffold/LongScaffold/LongScaffold.h"
 #include"../../GameObject/Terrains/Gimmick/SavePoint/SavePoint.h"

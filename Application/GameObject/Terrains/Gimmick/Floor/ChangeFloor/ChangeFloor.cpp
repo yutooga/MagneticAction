@@ -1,7 +1,7 @@
 ﻿#include "ChangeFloor.h"
-#include "../../../Character/Player/Player.h"
-#include"../../../../Manager/ModelManager/ModelManager.h"
-#include"../../../../Scene/SceneManager.h"
+#include "../../../../Character/Player/Player.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
+#include"../../../../../Scene/SceneManager.h"
 
 const float ChangeFloor::m_updateArea = 70.0f;
 const float ChangeFloor::k_adsorptionPower = 0.2f;
@@ -28,40 +28,18 @@ void ChangeFloor::Init()
 
 	// ImGui用のランダムなIdの生成
 	m_randomId = rand();
+
+	// 斥力の大きさの初期化
+	m_adPow = m_gimmickData["ChangeFloor"]["Adsorption"].value("Pow", k_adsorptionPower);
+
+	// 斥力の補正値の初期化
+	m_adjustAdValue = m_gimmickData["ChangeFloor"]["Adsorption"].value("AdjustValue", 6.f);
 }
 
 void ChangeFloor::Update()
 {
-	// クールタイムの更新
-	if (m_coolTime > 0)
-	{
-		m_coolTime--;
-		if (m_coolTime < 0)
-		{
-			m_coolTime = 0;
-		}
-	}
-
-	// まとう磁力が切り替わる間のカウントの更新
-	else if(m_changeInterval >= 0.0f && m_coolTime <= 0.0f)
-	{
-		m_changeInterval -= k_decreaseInterval;
-	}
-
-	//まとう磁力を切り替える処理
-	if (m_changeInterval < 0.0f)
-	{
-		if (m_maguneForce == MagunePowerN)
-		{
-			m_maguneForce = MagunePowerS;
-		}
-		else
-		{
-			m_maguneForce = MagunePowerN;
-		}
-		m_changeInterval = m_intervalMax;
-		m_coolTime = k_coolTimeLength;
-	}
+	// 纏っている磁力の切り替え
+	ChangeForce();
 
 	// 行列の確定
 	Math::Matrix scaleMat = Math::Matrix::CreateScale(k_modelScale);
@@ -133,20 +111,19 @@ void ChangeFloor::PlayerReaction()
 void ChangeFloor::DrawBright()
 {
 	//磁力をまとっていないなら描画しない
-	if (m_maguneForce == NoForce)return;
+	if ((m_maguneForce & NoForce) != 0)return;
 
-	Math::Color color;
-	if (m_maguneForce == MagunePowerN)
+	if ((m_maguneForce & MagunePowerN) != 0)
 	{
 		//S極の場合赤色に光らせる
-		color = { m_changeInterval/ m_intervalMax,0,1.f- (m_changeInterval / m_intervalMax)};
+		m_color = { m_changeInterval/ m_intervalMax,0,1.f- (m_changeInterval / m_intervalMax)};
 	}
-	else if (m_maguneForce == MagunePowerS)
+	else if ((m_maguneForce & MagunePowerS) != 0)
 	{
 		//N極の場合青色に光らせる
-		color = { 1.f - (m_changeInterval / m_intervalMax),0, m_changeInterval / m_intervalMax };
+		m_color = { 1.f - (m_changeInterval / m_intervalMax),0, m_changeInterval / m_intervalMax };
 	}
-	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, color);
+	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, m_color);
 }
 
 void ChangeFloor::DrawImGui()
@@ -173,9 +150,9 @@ void ChangeFloor::JugmentPlayer()
 		sphere[i].m_type = KdCollider::TypeSight;	//当たり判定をしたいタイプを設定
 	}
 
-	sphere[0].m_sphere.Center.y += 30.0f;
-	sphere[1].m_sphere.Center.y += 70.0f;
-	sphere[2].m_sphere.Center.y += 120.0f;
+	sphere[0].m_sphere.Center.y += m_gimmickData["ChangeFloor"]["Colision"]["SphereCenter"].value("Under", 30.f);
+	sphere[1].m_sphere.Center.y += m_gimmickData["ChangeFloor"]["Colision"]["SphereCenter"].value("Middle", 70.f);
+	sphere[2].m_sphere.Center.y += m_gimmickData["ChangeFloor"]["Colision"]["SphereCenter"].value("Top", 120.f);
 
 	//当たり判定
 	for (auto& obj : SceneManager::Instance().GetObjList())
@@ -240,5 +217,39 @@ void ChangeFloor::JugmentPlayer()
 			}
 		}
 				
+	}
+}
+
+void ChangeFloor::ChangeForce()
+{
+	// クールタイムの更新
+	if (m_coolTime > 0)
+	{
+		m_coolTime--;
+		if (m_coolTime < 0)
+		{
+			m_coolTime = 0;
+		}
+	}
+
+	// まとう磁力が切り替わる間のカウントの更新
+	else if (m_changeInterval >= 0.0f && m_coolTime <= 0.0f)
+	{
+		m_changeInterval -= k_decreaseInterval;
+	}
+
+	//まとう磁力を切り替える処理
+	if (m_changeInterval < 0.0f)
+	{
+		if ((m_maguneForce & MagunePowerN) != 0)
+		{
+			m_maguneForce = MagunePowerS;
+		}
+		else
+		{
+			m_maguneForce = MagunePowerN;
+		}
+		m_changeInterval = m_intervalMax;
+		m_coolTime = k_coolTimeLength;
 	}
 }

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"../MaguneFloorBase/MaguneFloorBase.h"
+#include"../../MaguneFloorBase/MaguneFloorBase.h"
 
 class ChangeFloor : public MagneFloorBase
 {
@@ -19,13 +19,15 @@ public:
 
 	void DrawImGui()override;
 
-	ObjectType GetObjType() { return ObjectType::ChangeFloor; }
+	ObjectType GetObjType()override { return ObjectType::ChangeFloor; }
 
 	// 回転角度調整関数
-	void SetAngle(float _angle) { m_angle = _angle; }
+	void SetAngle(const float _angle) { m_angle = _angle; }
 
 	// クールタイムの限界値調整関数
-	void SetIntervalMax(float _interval) { m_intervalMax = _interval; }
+	void SetIntervalMax(const float _interval) { m_intervalMax = _interval; }
+
+	//================================================
 
 	static const float m_updateArea;	// プレイヤー影響を及ぼす範囲
 
@@ -45,9 +47,15 @@ public:
 
 	static const int k_coolTimeLength = 300;	// クールタイムの長さ
 
+	//================================================
+
 private:
 
+	// プレイヤーが影響を受ける範囲内にいるかどうか判断する関数
 	void JugmentPlayer();
+
+	// 纏っている時局を切り替える関数
+	void ChangeForce();
 
 	// クールタイムの最大
 	float m_intervalMax = 0.0f;
@@ -65,11 +73,14 @@ private:
 	bool m_addFlg = false;
 
 	// 斥力の大きさ
-	float m_adPow = 0.2f;
+	float m_adPow = 0.f;
 
 	// 斥力の補正値
-	float m_adjustAdValue = 6.0f;
+	float m_adjustAdValue = 0.0f;
 
 	// クールタイム
 	int m_coolTime = 0;
+
+	// 表示色
+	Math::Color m_color;
 };
