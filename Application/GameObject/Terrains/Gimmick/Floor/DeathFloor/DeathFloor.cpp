@@ -89,14 +89,14 @@ void DeathFloor::OnHit(KdGameObject::ObjectType _obj)
 	// S極の磁力が付与された場合
 	if (_obj == KdGameObject::ObjectType::MaguneBulletS)
 	{
-		KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/MagunePower.wav",false);
+		KdAudioManager::Instance().Play(m_gimmickData["Se"]["MagunePower"]["URL"],false);
      	m_maguneForce = MagunePowerN;
 	}
 
 	// N極の磁力が付与された場合
 	else if(_obj == KdGameObject::ObjectType::MaguneBulletN)
 	{
-		KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/MagunePower.wav",false);
+		KdAudioManager::Instance().Play(m_gimmickData["Se"]["MagunePower"]["URL"],false);
 		m_maguneForce = MagunePowerS;
 	}
 }

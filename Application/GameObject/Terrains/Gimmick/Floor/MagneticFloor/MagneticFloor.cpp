@@ -1,13 +1,12 @@
 ﻿#include "MagneticFloor.h"
-#include"../../../../Scene/SceneManager.h"
-#include"../../../Character/Player/Player.h"
-#include"../../../../Manager/ModelManager/ModelManager.h"
+#include"../../../../../Scene/SceneManager.h"
+#include"../../../../Character/Player/Player.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
 
 const float MaguneticFloor::k_oppositionPower = 0.1f;
 const float MaguneticFloor::k_adsorptionPower = 0.4f;
 const float MaguneticFloor::k_adjustValue = 3.0f;
 const float MaguneticFloor::k_oppositionLimit = 30;
-const float MaguneticFloor::k_initialPower = 0.5f;
 
 void MaguneticFloor::Init()
 {
@@ -22,6 +21,15 @@ void MaguneticFloor::Init()
 
 	// まとう磁力の初期化
 	m_maguneForce = NoForce;
+
+	// モデルのサイズの初期化
+	m_modelSize = m_gimmickData["MaguneticFloor"].value("ModelSize", 3.5f);
+
+	// 磁力の範囲の初期化
+	m_maguneScope = m_gimmickData["MaguneticFloor"].value("MagneScope", 20.0f);
+
+	// 斥力の初期化
+	m_adPow = m_gimmickData["MaguneticFloor"]["Adsorption"].value("Pow", 0.4f);
 
 	// 当たり判定の形状登録
 	m_pDebugWire = std::make_unique<KdDebugWireFrame>();
@@ -77,15 +85,16 @@ void MaguneticFloor::MaguneScope()
 	sphere.m_sphere.Radius = m_maguneScope;
 	//当たり判定をしたいタイプを設定
 	sphere.m_type = KdCollider::TypeSight;
-	//デバック用
-	//m_pDebugWire->AddDebugSphere(sphere.m_sphere.Center, sphere.m_sphere.Radius);
 
 	//当たり判定
 	for (auto& obj : SceneManager::Instance().GetObjList())
 	{
+		//プレイヤー以外なら次のオブジェクトへ
 		if (obj->GetObjType() != ObjectType::Player)continue;
+
 		bool hitFlg = false;
 		hitFlg = obj->Intersects(sphere, nullptr);
+		
 		if (hitFlg)
 		{
 			OnHit(obj);
@@ -120,7 +129,7 @@ void MaguneticFloor::PlayerReaction()
 		if (oppCount == 0)
 		{
 			//反発SE再生
-			KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/Repulsion.wav", false);
+			KdAudioManager::Instance().Play(m_gimmickData["Se"]["Repulsion"]["URL"], false);
 		}
 
 		moveDir = m_obj.lock()->GetPos() - m_pos;
@@ -135,21 +144,32 @@ void MaguneticFloor::PlayerReaction()
 		{
 			m_nowState = State::NoState;
 			oppCount = 0;
-			m_oppoPow = k_initialPower;
+			m_oppoPow = m_gimmickData["MaguneticFloor"]["Opposition"].value("Pow", 0.5f);
 		}
 	}
 	//吸着処理
 	else if (m_nowState == State::Adsorption)
 	{
+
+		// 斥力の初期化
 		m_adPow = k_adsorptionPower;
 		moveDir = m_pos - m_obj.lock()->GetPos();
-		if (m_pos.y > m_obj.lock()->GetPos().y || m_pos.y < m_obj.lock()->GetPos().y)
+
+		// プレイヤーの座標
+		Math::Vector3 playerPos = m_obj.lock()->GetPos();
+
+		// オブジェクトの前後の座標
+		float front = m_pos.z + m_adjustAdValue;
+		float back = m_pos.z - m_adjustAdValue;
+
+		//プレイヤーがオブジェクトの上下にいる場合
+		if (m_pos.y > playerPos.y || m_pos.y < playerPos.y)
 		{
 			moveDir.x = 0;
 			moveDir.z = 0;
 			if(m_updateFlg)
 			{
-				if (m_obj.lock()->GetPos().z > (m_pos.z + m_adjustAdValue) || m_obj.lock()->GetPos().z < (m_pos.z - m_adjustAdValue))
+				if (playerPos.z > front || playerPos.z < back)
 				{
 					moveDir.y = 0;
 				}
@@ -158,18 +178,23 @@ void MaguneticFloor::PlayerReaction()
 		else
 		{
 			moveDir.y = 0;
-			if (m_obj.lock()->GetPos().z < (m_pos.z + m_adjustAdValue) && m_obj.lock()->GetPos().z >(m_pos.z - m_adjustAdValue))
+
+			// プレイヤーがオブジェクトの左右にいる場合
+			if (playerPos.z < front && playerPos.z > back)
 			{
-				if (m_pos.x > m_obj.lock()->GetPos().x || m_pos.x < m_obj.lock()->GetPos().x)
+				if (m_pos.x > playerPos.x || m_pos.x < playerPos.x)
 				{
 					moveDir.z = 0;
 				}
 			}
-			else if(m_pos.z > m_obj.lock()->GetPos().z || m_pos.z < m_obj.lock()->GetPos().z) 
+			// プレイヤーがオブジェクトの前後にいる場合
+			else if(m_pos.z > playerPos.z || m_pos.z < playerPos.z)
 			{ 
 				moveDir.x = 0; 
 			}
 		}
+
+		// プレイヤーをオブジェクト方向に引っ張る
 		if (moveDir.Length() < k_adsorptionPower)m_adPow = moveDir.Length();
 		moveDir.Normalize();
 		addPos += moveDir * m_adPow;

@@ -26,7 +26,7 @@
 #include"../../GameObject/Terrains/Gimmick/GateWall/GateWall.h"
 #include"../../GameObject/Terrains/Gimmick/Floor/MoveMagneFloor/MoveMagneFloor.h"
 #include"../../GameObject/Terrains/Gimmick/Ramparts/Ramparts.h"
-#include"../../GameObject/Terrains/Gimmick/MagneticFloor/MagneticFloor.h"
+#include"../../GameObject/Terrains/Gimmick/Floor/MagneticFloor/MagneticFloor.h"
 #include"../../GameObject/Terrains/Gimmick/MaguneWall/MaguneWall.h"
 #include"../../GameObject/Terrains/Gimmick/Rail/Rail.h"
 #include"../../GameObject/Terrains/Gimmick/Coil/Coil.h"
