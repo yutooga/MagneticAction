@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"../../../Terrains/TerrainsBase.h"
+#include"../../../../Terrains/TerrainsBase.h"
 
 class JointLift : public TerrainsBase
 {
@@ -27,13 +27,13 @@ public:
 private:
 
 	// モデルのサイズ
-	float m_modelSize = 4.6f;
+	float m_modelSize = 0.f;
 
 	// 回転角度
 	float m_angle = 0.0f;
 
 	// 移動スピード
-	float m_moveSpeed = 2.f;
+	float m_moveSpeed = 0.f;
 
 	// 進行方向のオプション
 	MoveDirOption m_dir = MoveDirOption::None;

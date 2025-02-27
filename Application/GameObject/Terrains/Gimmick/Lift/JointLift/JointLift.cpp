@@ -1,6 +1,6 @@
 ﻿#include "JointLift.h"
-#include"../../../../Manager/ModelManager/ModelManager.h"
-#include"../../../Manager/UpdateObjManager/UpdateObjManager.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
+#include"../../../../Manager/UpdateObjManager/UpdateObjManager.h"
 
 void JointLift::Init()
 {
@@ -9,6 +9,12 @@ void JointLift::Init()
 	{
 		m_model = ModelManager::Instance().GetModel("JointLift");
 	}
+
+	// モデルのサイズの初期化
+	m_modelSize = m_gimmickData["JointLift"].value("ModelSize", 4.6f);
+
+	// 動く速さの初期化
+	m_moveSpeed = m_gimmickData["JointLift"].value("MoveSpeed", 2.f);
 
 	// IMGUI用の初期化
 	m_randomId = rand();
@@ -31,15 +37,17 @@ void JointLift::Update()
 	}
 
 	// 座標更新
-	if(m_dir == MoveDirOption::X)
+	switch (m_dir)
 	{
+	case JointLift::MoveDirOption::X:
 		m_pos.x += sin(DirectX::XMConvertToRadians(m_angle)) * m_moveSpeed;
-	}
-	else if (m_dir == MoveDirOption::Z)
-	{
+		break;
+	case JointLift::MoveDirOption::Z:
 		m_pos.z += sin(DirectX::XMConvertToRadians(m_angle)) * m_moveSpeed;
+		break;
+	default:
+		break;
 	}
-
 
 	// 行列の確定
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
