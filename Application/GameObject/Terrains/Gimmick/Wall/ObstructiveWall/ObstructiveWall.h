@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"../../TerrainsBase.h"
+#include"../../../TerrainsBase.h"
 
 class ObstructiveWall : public TerrainsBase
 {
@@ -29,7 +29,7 @@ private:
 	// オブジェクトの纏っている磁極を変化させる処理
 	void ChangeMagneForce();
 
-	void ColisionCheck(const float _radius, ColisionOption _option);
+	void ColisionCheck(const float _radius, const ColisionOption _option);
 
 	void OnHit(const UINT& _magneForce,const Math::Vector3& _targetPos);
 
@@ -48,6 +48,7 @@ private:
 	// オブジェクトの動くスピード
 	float m_moveSpeed = 0.0f;
 
+	// 磁極を切り替えるタイミングを記録する変数
 	float m_changeMoment = 0.0f;
 
 };

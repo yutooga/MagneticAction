@@ -1,6 +1,6 @@
 ﻿#include "ObstructiveWall.h"
-#include"../../../../Manager/ModelManager/ModelManager.h"
-#include"../../../../Scene/SceneManager.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
+#include"../../../../../Scene/SceneManager.h"
 
 void ObstructiveWall::Init()
 {
@@ -129,7 +129,7 @@ void ObstructiveWall::ChangeMagneForce()
 	m_beforeMagneForce = m_maguneForce;
 }
 
-void ObstructiveWall::ColisionCheck(const float _radius, ColisionOption _option)
+void ObstructiveWall::ColisionCheck(const float _radius, const ColisionOption _option)
 {
 	//===============================
 	//              球判定
@@ -153,7 +153,7 @@ void ObstructiveWall::ColisionCheck(const float _radius, ColisionOption _option)
 	for (auto& obj : SceneManager::Instance().GetObjList())
 	{
 		if (obj->GetObjType() != ObjectType::ObstructiveWall)continue;	// 特定のオブジェクト以外当たり判定をしない
-		else if ((m_pos - obj->GetPos()).Length() < m_colisionGard)continue;	// 自分同士とは当たり判定をしないS
+		else if ((m_pos - obj->GetPos()).Length() < m_colisionGard)continue;	// 自分同士とは当たり判定をしない
 
 		if ((obj->GetMaguneForce() & NoForce) != 0)continue;	//磁力を帯びてない物体とは当たり判定しない
 
@@ -162,21 +162,27 @@ void ObstructiveWall::ColisionCheck(const float _radius, ColisionOption _option)
 
 		// 当たっているときの処理
 
-		if (hitFlg && _option == ColisionOption::DifferentForce)
+		// 当たっていないなら以下処理しない
+		if (!hitFlg)continue;
+
+		switch (_option)
 		{
+		case ColisionOption::DifferentForce:
 			//違う極の磁力をまとっているならHIT時の処理をする
 			if (m_maguneForce != obj->GetMaguneForce())
 			{
 				OnHit(obj->GetMaguneForce(), obj->GetPos());
 			}
-		}
-		else if (hitFlg && _option == ColisionOption::SameForce)
-		{
+			break;
+		case ColisionOption::SameForce:
 			//同じ極の磁力をまとっているならHIT時の処理をする
 			if (m_maguneForce == obj->GetMaguneForce())
 			{
 				OnHit(obj->GetMaguneForce(), obj->GetPos());
 			}
+			break;
+		default:
+			break;
 		}
 	}
 }
@@ -184,7 +190,7 @@ void ObstructiveWall::ColisionCheck(const float _radius, ColisionOption _option)
 void ObstructiveWall::OnHit(const UINT& _magneForce, const Math::Vector3& _targetPos)
 {
 	// 移動スピードの初期化
-	m_moveSpeed = 1.0f;
+	m_moveSpeed = m_gimmickData["ObstructiveWall"].value("MoveSpeed", 1.f);
 	Math::Vector3 moveDir;
 
 	// 自分と相手が同じ極の磁力をまとっているとき(反発処理)
