@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"../../MaguneFloorBase/MaguneFloorBase.h"
+#include"../../Floor/MagneFloorBase/MagneFloorBase.h"
 
 class MoveMagneFloor : public MagneFloorBase
 {

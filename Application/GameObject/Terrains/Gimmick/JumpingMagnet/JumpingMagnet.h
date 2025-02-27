@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include"../MaguneFloorBase/MaguneFloorBase.h"
+#include"../Floor/MagneFloorBase/MagneFloorBase.h"
 
 class JumpingMagnet : public MagneFloorBase
 {
@@ -49,7 +49,7 @@ private:
 	void FloatingPlayer(const std::weak_ptr<KdGameObject>& _obj);
 
 	// 影響を与える範囲内にいるかどうか判断する関数
-	void MaguneScope()override;
+	void MagneScope()override;
 
 	// モデルのサイズ
 	float m_modelSize = 8.4f;

@@ -278,7 +278,7 @@ void MoveMagneFloor::SpecialMove::Update(MoveMagneFloor& owner)
 void MoveMagneFloor::SpecialMove::PostUpdate(MoveMagneFloor& owner)
 {
 	//エリア判定
-	owner.MaguneScope();
+	owner.MagneScope();
 	//エリア内にプレイヤーが入った時の処理
 	owner.PlayerReaction();
 }

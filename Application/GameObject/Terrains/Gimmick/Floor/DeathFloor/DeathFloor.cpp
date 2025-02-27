@@ -174,7 +174,7 @@ void DeathFloor::ColisionCheck(const float _radius, const ColisionOption& _optio
 	}
 }
 
-void DeathFloor::MaguneScope()
+void DeathFloor::MagneScope()
 {
 	//===============================
 	//              球判定

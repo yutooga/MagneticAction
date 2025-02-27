@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"../../MaguneFloorBase/MaguneFloorBase.h"
+#include"../../Floor/MagneFloorBase/MagneFloorBase.h"
 
 class DeathFloor : public MagneFloorBase
 {
@@ -65,7 +65,7 @@ private:
 	void ColisionCheck(const float _radius, const ColisionOption& _option, std::list<std::weak_ptr<KdGameObject>>& _hitList);
 
 	// 一定範囲内にプレイヤーがいるかどうか判定
-	void MaguneScope()override;
+	void MagneScope()override;
 
 	// 範囲内にいた時のプレイヤーの処理
 	void PlayerReaction()override;

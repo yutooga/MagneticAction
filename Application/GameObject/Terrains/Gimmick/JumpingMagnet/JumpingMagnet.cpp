@@ -202,7 +202,7 @@ void JumpingMagnet::FloatingPlayer(const std::weak_ptr<KdGameObject>& _obj)
 	m_updateFlg = true;
 }
 
-void JumpingMagnet::MaguneScope()
+void JumpingMagnet::MagneScope()
 {
 	//===============================
 	//              球判定

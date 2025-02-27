@@ -50,7 +50,7 @@ void MaguneticFloor::PostUpdate()
 	if ((m_maguneForce & NoForce) != 0)return;
 
 	//エリア判定
-	MaguneScope();
+	MagneScope();
 
 	//エリア内にプレイヤーが入った時の処理
 	PlayerReaction();
@@ -69,7 +69,7 @@ void MaguneticFloor::DrawImGui()
 	ImGui::PopID();
 }
 
-void MaguneticFloor::MaguneScope()
+void MaguneticFloor::MagneScope()
 {
 
 	//===============================

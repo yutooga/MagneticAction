@@ -42,7 +42,7 @@ public:
 private:
 
 	//プレイヤーとの当たり判定
-	void MaguneScope();
+	void MagneScope();
 
 	void PlayerReaction();
 

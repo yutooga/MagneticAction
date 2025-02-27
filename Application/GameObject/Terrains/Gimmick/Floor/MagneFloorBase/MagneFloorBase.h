@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"../../TerrainsBase.h"
+#include"../../../TerrainsBase.h"
 
 class MagneFloorBase :public TerrainsBase
 {
@@ -20,7 +20,7 @@ public:
 protected:
 
 	//プレイヤーとの当たり判定
-	virtual void MaguneScope();
+	virtual void MagneScope();
 
 	// プレイヤー側の処理が書かれた関数
 	virtual void PlayerReaction();
@@ -39,7 +39,7 @@ protected:
 	// 今の状態を保持する変数
 	State m_nowState = State::NormalState;
 	
-	
+	// 対象のオブジェクトを記憶しておく変数
 	std::weak_ptr<KdGameObject> m_obj;
 
 	// 反発する力
