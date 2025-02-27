@@ -23,7 +23,7 @@
 #include"../../GameObject/Terrains/Gimmick/SavePoint/SavePoint.h"
 #include"../../GameObject/Terrains/Gimmick/Goal/Goal.h"
 #include"../../GameObject/Terrains/Gimmick/Gate/Gate.h"
-#include"../../GameObject/Terrains/Gimmick/GateWall/GateWall.h"
+#include"../../GameObject/Terrains/Gimmick/Wall/GateWall/GateWall.h"
 #include"../../GameObject/Terrains/Gimmick/Floor/MoveMagneFloor/MoveMagneFloor.h"
 #include"../../GameObject/Terrains/Gimmick/Ramparts/Ramparts.h"
 #include"../../GameObject/Terrains/Gimmick/Floor/MagneticFloor/MagneticFloor.h"

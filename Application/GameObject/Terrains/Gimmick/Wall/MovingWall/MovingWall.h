@@ -35,8 +35,6 @@ public:
 	// 回転角度設定関数
 	void SetRotAngle(const float _angle = 61.3f) { m_angle = _angle; }
 
-	static const float k_moveSpeed;	// 移動速度
-
 	static const float k_adjustAdValue;	// 斥力の補正値
 
 	static const float k_repulsionMoveSpeed;	// 斥力処理の時の動く速さ

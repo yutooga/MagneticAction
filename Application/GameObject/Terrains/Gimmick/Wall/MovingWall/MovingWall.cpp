@@ -2,7 +2,6 @@
 #include"../../../../../Scene/SceneManager.h"
 #include"../../../../../Manager/ModelManager/ModelManager.h"
 
-const float MovingWall::k_moveSpeed = 0.5f;
 const float MovingWall::k_adjustAdValue = 5.f;
 const float MovingWall::k_repulsionMoveSpeed = 0.7f;
 const float MovingWall::k_colisionGuard = 5.f;
@@ -93,7 +92,7 @@ void MovingWall::OnHit(Math::Vector3 _pos, UINT _maguneForce, Size _size)
 {
 
 	// 移動スピードの初期化
-	m_moveSpeed = k_moveSpeed;
+	m_moveSpeed = m_gimmickData["MovingWall"].value("MoveSpeed", 0.5f);
 
 	// 移動方向
 	Math::Vector3 moveDir;

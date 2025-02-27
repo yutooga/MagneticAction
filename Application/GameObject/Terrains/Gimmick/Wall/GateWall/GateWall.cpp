@@ -1,21 +1,25 @@
 ﻿#include "GateWall.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
 
 void GateWall::Init()
 {
 	// モデルの読み込み
 	if (!m_model)
 	{
-		m_model = std::make_shared<KdModelWork>();
-		m_model->SetModelData("Asset/Models/Terrains/Gimmick/Gate/Gate_Wall_1.gltf");
+		m_model = ModelManager::Instance().GetModel("GateWall");
 	}
+
+	// モデルのサイズの初期化
+	m_modelSize = m_gimmickData["GateWall"].value("ModelSize", 16.5f);
 
 	// 当たり判定の形状登録
 	m_pCollider = std::make_unique<KdCollider>();
 	m_pCollider->RegisterCollisionShape("GateWall", m_model, KdCollider::TypeGround);
 
 	//カメラのローカル行列
-	Math::Matrix _transMat = Math::Matrix::CreateTranslation(0, 5.f, 15.f);
-	Math::Matrix _rotMat = Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(180));
+	Math::Matrix _transMat = Math::Matrix::CreateTranslation(m_gimmickData["GateWall"]["Camera"]["Pos"].value("X",0.f), 
+		m_gimmickData["GateWall"]["Camera"]["Pos"].value("Y", 5.f), m_gimmickData["GateWall"]["Camera"]["Pos"].value("Z",15.f));
+	Math::Matrix _rotMat = Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_gimmickData["GateWall"]["Camera"].value("Angle", 180.f)));
 	m_localCamera = _rotMat * _transMat;
 }
 

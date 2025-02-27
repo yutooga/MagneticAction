@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include"../../TerrainsBase.h"
+#include"../../../TerrainsBase.h"
 
 class GateWall : public TerrainsBase
 {
 public:
 	GateWall(){}
-	~GateWall(){}
+	~GateWall()override{}
 
 	void Init()override;
 
@@ -21,6 +21,6 @@ public:
 private:
 
 	// モデルのサイズ
-	float m_modelSize = 16.5f;
+	float m_modelSize = 0.f;
 
 };
