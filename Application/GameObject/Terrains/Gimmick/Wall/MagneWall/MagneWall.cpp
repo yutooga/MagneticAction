@@ -1,11 +1,8 @@
-﻿#include "MaguneWall.h"
-#include"../../../../Scene/SceneManager.h"
-#include"../../../../Manager/ModelManager/ModelManager.h"
+﻿#include "MagneWall.h"
+#include"../../../../../Scene/SceneManager.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
 
-const float MaguneWall::k_modelSize = 3.0f;
-const float MaguneWall::k_area = 30.f;
-
-void MaguneWall::Init()
+void MagneWall::Init()
 {
 	// モデルの読み込み
 	if (!m_model)
@@ -16,6 +13,9 @@ void MaguneWall::Init()
 	// まとっている磁力の初期化
 	m_maguneForce = NoForce;
 
+	// モデルのサイズの初期化
+	m_modelSize = m_gimmickData["MagneWall"].value("ModelSize", 3.f);
+
 	// IMGUI用の初期化
 	m_randomId = rand();
 
@@ -23,30 +23,30 @@ void MaguneWall::Init()
 	m_pDebugWire = std::make_unique<KdDebugWireFrame>();
 }
 
-void MaguneWall::Update()
+void MagneWall::Update()
 {
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
-	Math::Matrix scaleMat = Math::Matrix::CreateScale(k_modelSize);
+	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_modelSize);
 	m_mWorld = scaleMat * transMat;
 }
 
-void MaguneWall::PostUpdate()
+void MagneWall::PostUpdate()
 {
 	//プレイヤーが一定範囲内にいないなら早期リターン
 	MagneFloorBase::PostUpdate();
 }
 
-void MaguneWall::DrawImGui()
+void MagneWall::DrawImGui()
 {
 	ImGui::PushID(m_randomId);
-	if (ImGui::CollapsingHeader("MaguneWall", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader("MagneWall", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::DragFloat3("MaguneWall m_pos", &m_pos.x, 0.1f);
+		ImGui::DragFloat3("MagneWall m_pos", &m_pos.x, 0.1f);
 	}
 	ImGui::PopID();
 }
 
-void MaguneWall::PlayerReaction()
+void MagneWall::PlayerReaction()
 {
 	//オブジェクトが存在しないまたは磁力をまとっていないなら早期リターン
 	if (m_nowState == State::NormalState || m_obj.expired() == true)return;
@@ -56,14 +56,13 @@ void MaguneWall::PlayerReaction()
 	// 加算量
 	Math::Vector3 addPos = m_obj.lock()->GetPos();
 
-	// 反発状態の時
-	if (m_nowState == State::Opposition)
+	switch (m_nowState)
 	{
-
+	case MagneFloorBase::State::Opposition:	// 反発状態の時
 		if (m_oppCnt == 0)
 		{
 			//反発SE再生
-			KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/Repulsion.wav", false);
+			KdAudioManager::Instance().Play(m_gimmickData["Se"]["Repulsion"]["URL"], false);
 		}
 
 		// 反発処理
@@ -81,11 +80,8 @@ void MaguneWall::PlayerReaction()
 			m_oppCnt = 0;
 			m_oppoPow = k_initialOppoPowerValue;
 		}
-	}
-
-	// 吸着状態の時
-	else if (m_nowState == State::Adsorption)
-	{
+		break;
+	case MagneFloorBase::State::Adsorption:	// 吸着状態の時
 		//吸着処理
 		m_adPow = k_adsorptionPower;
 		moveDir = m_pos - m_obj.lock()->GetPos();
@@ -93,5 +89,8 @@ void MaguneWall::PlayerReaction()
 		moveDir.Normalize();
 		addPos += moveDir * m_adPow;
 		m_obj.lock()->SettingPos(addPos);
+		break;
+	default:
+		break;
 	}
 }

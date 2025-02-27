@@ -27,7 +27,7 @@
 #include"../../GameObject/Terrains/Gimmick/Floor/MoveMagneFloor/MoveMagneFloor.h"
 #include"../../GameObject/Terrains/Gimmick/Ramparts/Ramparts.h"
 #include"../../GameObject/Terrains/Gimmick/Floor/MagneticFloor/MagneticFloor.h"
-#include"../../GameObject/Terrains/Gimmick/MaguneWall/MaguneWall.h"
+#include"../../GameObject/Terrains/Gimmick/Wall/MagneWall/MagneWall.h"
 #include"../../GameObject/Terrains/Gimmick/Rail/Rail.h"
 #include"../../GameObject/Terrains/Gimmick/Coil/Coil.h"
 #include"../../GameObject/Terrains/Gimmick/Conductor/Conductor.h"
@@ -506,7 +506,7 @@ void GameScene::LoadGimmickDefaultParam(const std::string& _filePath)
 				//=====================================
 				// 磁力壁初期化
 				//=====================================
-				std::shared_ptr<MaguneWall> wall = std::make_shared<MaguneWall>();
+				std::shared_ptr<MagneWall> wall = std::make_shared<MagneWall>();
 				wall->Init();
 				wall->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				wall->SetMaguneForce(KdGameObject::MagunePowerN);
