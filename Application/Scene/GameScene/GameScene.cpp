@@ -14,7 +14,7 @@
 #include"../../GameObject/2DObject/Pause/Pause.h"
 #include"../../GameObject/2DObject/MagunePower/MagunePower.h"
 #include"../../GameObject/Weapon/MagneGun/MagneGun.h"
-#include"../../GameObject/Terrains/Gimmick/MovingWall/MovingWall.h"
+#include"../../GameObject/Terrains/Gimmick/Wall/MovingWall/MovingWall.h"
 #include"../../GameObject/Terrains/Gimmick/JumpingMagnet/JumpingMagnet.h"
 #include"../../GameObject/Terrains/Gimmick/MagicRing/MagicRing.h"
 #include"../../GameObject/Terrains/Gimmick/Floor/ChangeFloor/ChangeFloor.h"
@@ -320,10 +320,10 @@ void GameScene::LoadGimmickDefaultParam(const std::string& _filePath)
 				// 動く壁初期化
 				//=====================================
 				std::shared_ptr<MovingWall> wall = std::make_shared<MovingWall>();
-				wall->SetSize(MovingWall::Size::Small);
-				wall->SetObjType(KdGameObject::ObjectType::MovingWall);
 				wall->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				wall->Init();
+				wall->SetSize(MovingWall::Size::Small);
+				wall->SetObjType(KdGameObject::ObjectType::MovingWall);
 				m_objList.push_back(wall);
 				break;
 			}
@@ -532,10 +532,10 @@ void GameScene::LoadGimmickDefaultParam(const std::string& _filePath)
 				// 動く壁初期化
 				//=====================================
 				std::shared_ptr<MovingWall> wall = std::make_shared<MovingWall>();
-				wall->SetModelSize(1.0f);
-				wall->SetSize(MovingWall::Size::Big);
 				wall->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				wall->Init();
+				wall->SetModelSize(1.0f);
+				wall->SetSize(MovingWall::Size::Big);
 				wall->SetObjType(KdGameObject::ObjectType::BigMovingWall);
 				m_objList.push_back(wall);
 				break;
@@ -825,11 +825,11 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				// 動く壁初期化(回転あり)
 				//=====================================
 				std::shared_ptr<MovingWall> wall = std::make_shared<MovingWall>();
+				wall->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
+				wall->Init();
 				wall->SetSize(MovingWall::Size::Small);
 				wall->SetObjType(KdGameObject::ObjectType::MovingWall);
-				wall->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				wall->SetRotAngle(row[5]);
-				wall->Init();
 				m_objList.push_back(wall);
 				break;
 			}

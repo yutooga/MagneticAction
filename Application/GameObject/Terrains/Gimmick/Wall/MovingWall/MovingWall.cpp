@@ -1,5 +1,6 @@
 ﻿#include "MovingWall.h"
-#include"../../../../Scene/SceneManager.h"
+#include"../../../../../Scene/SceneManager.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
 
 const float MovingWall::k_moveSpeed = 0.5f;
 const float MovingWall::k_adjustAdValue = 5.f;
@@ -25,6 +26,15 @@ void MovingWall::Init()
 
 	// 一番最初の座標を保存する
 	m_firstPos = m_pos;
+
+	// モデルのサイズの初期化
+	m_modelSize = m_gimmickData["MovingWall"].value("ModelSize", 5.f);
+
+	// 動く速さの初期化
+	m_moveSpeed = m_gimmickData["MovingWall"].value("MoveSpeed", 0.5f);
+
+	// 回転角度の初期化
+	m_angle = m_gimmickData["MovingWall"].value("Angle", 61.3f);
 }
 
 void MovingWall::Update()
@@ -66,13 +76,16 @@ void MovingWall::DrawImGui()
 
 void MovingWall::SetSize(const Size& _size)
 {
-	if (_size == Size::Small)
+	switch (_size)
 	{
+	case Size::Small:
 		SetSize(std::make_shared<MovingWall::SmallSize>());
-	}
-	else
-	{
+		break;
+	case Size::Big:
 		SetSize(std::make_shared<MovingWall::BigSize>());
+		break;
+	default:
+		break;
 	}
 }
 
@@ -81,29 +94,13 @@ void MovingWall::OnHit(Math::Vector3 _pos, UINT _maguneForce, Size _size)
 
 	// 移動スピードの初期化
 	m_moveSpeed = k_moveSpeed;
+
+	// 移動方向
 	Math::Vector3 moveDir;
 
-	// 大きいサイズの時
-	if (_size == Size::Big)
+	switch (_size)
 	{
-		m_updateFlg = true;
-
-		if (m_maguneForce == _maguneForce)
-		{
-			moveDir = m_firstPos - m_pos;
-			if (moveDir.Length() < m_moveSpeed)m_moveSpeed = 0;
-		}
-		// 違う極をまとっているとき(斥力処理)
-		else if (m_maguneForce != _maguneForce)
-		{
-			moveDir = _pos - m_pos;
-			m_moveSpeed = k_repulsionMoveSpeed;
-		}
-	}
-
-	// 小さいサイズの時
-	else if(_size == Size::Small)
-	{
+	case Size::Small:	// 小さいサイズの時
 		// 自分と相手が同じ極の磁力をまとっているとき(反発処理)
 		if (m_maguneForce == _maguneForce)
 		{
@@ -116,6 +113,24 @@ void MovingWall::OnHit(Math::Vector3 _pos, UINT _maguneForce, Size _size)
 			moveDir = m_firstPos - m_pos;
 			if (moveDir.Length() < m_moveSpeed)m_moveSpeed = 0;
 		}
+		break;
+	case Size::Big:	// 大きいサイズの時
+		m_updateFlg = true;
+		// 自分と相手が同じ極の磁力をまとっているとき(反発処理)
+		if (m_maguneForce == _maguneForce)
+		{
+			moveDir = m_firstPos - m_pos;
+			if (moveDir.Length() < m_moveSpeed)m_moveSpeed = 0;
+		}
+		// 違う極をまとっているとき(斥力処理)
+		else if (m_maguneForce != _maguneForce)
+		{
+			moveDir = _pos - m_pos;
+			m_moveSpeed = k_repulsionMoveSpeed;
+		}
+		break;
+	default:
+		break;
 	}
 
 	moveDir.Normalize();
@@ -135,15 +150,16 @@ void MovingWall::PlayerReaction()
 	Math::Vector3 moveDir = Math::Vector3::Zero;
 	Math::Vector3 addPos = m_obj.lock()->GetPos();
 
-	// 反発状態の時
-	if (m_nowState == State::Opposition)
+	switch (m_nowState)
 	{
-		//反発処理
+	case MagneFloorBase::State::Opposition:	// 反発状態の時
+	{
 
+		//反発処理
 		if (m_oppCnt == 0)
 		{
 			//反発SE再生
-			KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/Repulsion.wav", false);
+			KdAudioManager::Instance().Play(m_gimmickData["Se"]["Repulsion"]["URL"], false);
 		}
 
 		// オブジェクトとプレイヤーの位置から反発方向を決める
@@ -161,30 +177,39 @@ void MovingWall::PlayerReaction()
 			m_oppCnt = 0;
 			m_oppoPow = k_initialOppoPowerValue;
 		}
+		break;
 	}
-	
-	// 吸着状態の時
-	else if (m_nowState == State::Adsorption)
+	case MagneFloorBase::State::Adsorption:	// 吸着状態の時
 	{
 		//吸着処理
 
+		Math::Vector3 PlayerPos = m_obj.lock()->GetPos();
+
 		m_adPow = k_adsorptionPower;
-		moveDir = m_pos - m_obj.lock()->GetPos();
-		
+		moveDir = m_pos - PlayerPos;
+
+
 		// プレイヤーがオブジェクトのどの側面にくっついているか判別する処理
-		if (m_obj.lock()->GetPos().z < (m_pos.z + k_adjustAdValue) && m_obj.lock()->GetPos().z >(m_pos.z - k_adjustAdValue))
+
+		// プレイヤーがオブジェクトの左右にいる場合
+		if (PlayerPos.z < (m_pos.z + k_adjustAdValue) && PlayerPos.z >(m_pos.z - k_adjustAdValue))
 		{
-			if (m_pos.x > m_obj.lock()->GetPos().x || m_pos.x < m_obj.lock()->GetPos().x)
+			if (m_pos.x > PlayerPos.x || m_pos.x < PlayerPos.x)
 			{
 				moveDir.z = 0;
 			}
 		}
-		else if (m_pos.z > m_obj.lock()->GetPos().z || m_pos.z < m_obj.lock()->GetPos().z) { moveDir.x = 0; }
+		// プレイヤーがオブジェクトの前後にいる場合
+		else if (m_pos.z > PlayerPos.z || m_pos.z < PlayerPos.z) { moveDir.x = 0; }
 
 		if (moveDir.Length() < k_adsorptionPower)m_adPow = moveDir.Length();
 		moveDir.Normalize();
 		addPos += moveDir * m_adPow;
 		m_obj.lock()->SettingPos(addPos);
+		break;
+	}
+	default:
+		break;
 	}
 }
 
@@ -202,7 +227,7 @@ void MovingWall::ColisionCheck(const float _radius, ColisionOption _option, Size
 
 	//球の中心位置を設定
 	sphere.m_sphere.Center = m_pos;
-	sphere.m_sphere.Center.y += 15.0f;
+	sphere.m_sphere.Center.y += m_gimmickData["MovingWall"]["Colision"].value("AdjsutY", 15.f);
 
 	//球の半径を設定
 	sphere.m_sphere.Radius = _radius;
@@ -213,17 +238,21 @@ void MovingWall::ColisionCheck(const float _radius, ColisionOption _option, Size
 	//当たり判定
 	for (auto& obj : SceneManager::Instance().GetObjList())
 	{
-		if(_size == Size::Small)
+		switch (_size)
 		{
+		case MovingWall::Size::Small:
 			if (obj->GetObjType() != ObjectType::MovingWall)continue;	// 指定のオブジェクト以外当たり判定しない
-		}
-		else if (_size == Size::Big)
-		{
+			break;
+		case MovingWall::Size::Big:
 			if (obj->GetObjType() != ObjectType::BigMovingWall)continue;
+			break;
+		default:
+			break;
 		}
 		
 		if ((obj->GetMaguneForce() & NoForce)!= 0)continue;	//磁力を帯びてない物体とは当たり判定しない
 
+		// 自分自身とは当たり判定しない
 		if (abs(m_pos.x-obj->GetPos().x) < k_colisionGuard && abs(m_pos.z - obj->GetPos().z) < k_colisionGuard) {
 			continue;
 		}
@@ -234,45 +263,33 @@ void MovingWall::ColisionCheck(const float _radius, ColisionOption _option, Size
 
 		// 当たっているときの処理
 
-		if (hitFlg && _option == ColisionOption::DifferentForce)
+		if (!hitFlg)continue;	// 当たっていないなら処理を飛ばす
+
+		switch (_option)
 		{
+		case MovingWall::ColisionOption::DifferentForce:
 			//違う極の磁力をまとっているならHIT時の処理をする
 			if (m_maguneForce != obj->GetMaguneForce())
 			{
-				if(_size == Size::Small)
-				{
-					OnHit(obj->GetPos(), obj->GetMaguneForce(),Size::Small);
-				}
-				else if (_size == Size::Big)
-				{
-					OnHit(obj->GetPos(), obj->GetMaguneForce(),Size::Big);
-				}
+				OnHit(obj->GetPos(), obj->GetMaguneForce(), _size);
 			}
-		}
-		else if (hitFlg && _option == ColisionOption::SameForce)
-		{
+			break;
+		case MovingWall::ColisionOption::SameForce:
 			//同じ極の磁力をまとっているならHIT時の処理をする
 			if (m_maguneForce == obj->GetMaguneForce())
 			{
-				if(_size == Size::Small)
-				{
-					OnHit(obj->GetPos(), obj->GetMaguneForce(),Size::Small);
-				}
-				else if (_size == Size::Big)
-				{
-					OnHit(obj->GetPos(), obj->GetMaguneForce(),Size::Big);
-				}
+				OnHit(obj->GetPos(), obj->GetMaguneForce(), _size);
 			}
-		}
-
-		// オブジェクトが近づきすぎているとき
-		else if (hitFlg && _option == ColisionOption::WallDistance)
-		{
+			break;
+		case MovingWall::ColisionOption::WallDistance:	// オブジェクトが近づきすぎているとき
 			//まとっている磁力の極がちがうならHIT処理をする
 			if (m_maguneForce != obj->GetMaguneForce())
 			{
 				OnHit(obj->GetPos());
 			}
+			break;
+		default:
+			break;
 		}
 	}
 }
@@ -289,8 +306,7 @@ void MovingWall::BigSize::Enter(MovingWall& owner)
 	// モデルの読み込み
 	if (!owner.m_model)
 	{
-		owner.m_model = std::make_shared<KdModelWork>();
-		owner.m_model->SetModelData("Asset/Models/Terrains/Gimmick/BigMovingWall/MovingWall2.gltf");
+		owner.m_model = ModelManager::Instance().GetModel("BigMovingWall");
 	}
 
 	owner.m_angle = 0.0f;
@@ -327,17 +343,12 @@ void MovingWall::BigSize::Update(MovingWall& owner)
 	owner.ColisionCheck(k_sameForceBigColisionRadius, ColisionOption::SameForce, Size::Big);
 }
 
-void MovingWall::BigSize::PostUpdate(MovingWall& owner)
-{
-}
-
 void MovingWall::SmallSize::Enter(MovingWall& owner)
 {
 	// モデルの読み込み
 	if (!owner.m_model)
 	{
-		owner.m_model = std::make_shared<KdModelWork>();
-		owner.m_model->SetModelData("Asset/Models/Terrains/Gimmick/MovingWall/MovingWall.gltf");
+		owner.m_model = ModelManager::Instance().GetModel("MovingWall");
 	}
 
 	// 当たり判定の形状登録

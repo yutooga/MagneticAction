@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include"../../TerrainsBase.h"
-#include"../Floor/MagneFloorBase/MagneFloorBase.h"
+#include"../../../TerrainsBase.h"
+#include"../../Floor/MagneFloorBase/MagneFloorBase.h"
 
 class Player;
 
@@ -8,7 +8,7 @@ class MovingWall :public MagneFloorBase
 {
 public:
 	MovingWall(){}
-	~MovingWall(){}
+	~MovingWall()override{}
 
 	enum class Size
 	{
@@ -92,7 +92,7 @@ private:
 		~BigSize(){}
 		void Enter(MovingWall& owner);
 		void Update(MovingWall& owner);
-		void PostUpdate(MovingWall& owner);
+		void PostUpdate([[maybe_unused]] MovingWall& owner){}
 		void Exit([[maybe_unused]] MovingWall& owner) {}
 
 		static const float k_sameForceBigColisionRadius;	// 同じ磁極同士の当たり判定の大きさ
