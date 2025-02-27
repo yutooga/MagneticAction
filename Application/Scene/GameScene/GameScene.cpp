@@ -39,7 +39,7 @@
 #include"../../GameObject/Terrains/Gimmick/JointLift/JointLift.h"
 #include"../../GameObject/Terrains/Gimmick/TargetLift/TargetLift.h"
 #include"../../GameObject/Terrains/Gimmick/Wall/ObstructiveWall/ObstructiveWall.h"
-#include"../../GameObject/Terrains/Wall/StoneWall/StoneWall.h"
+#include"../../GameObject/Terrains/Gimmick/Wall/StoneWall/StoneWall.h"
 #include"../../GameObject/Terrains/Gimmick/MagneBox/MagneBox.h"
 #include"../../GameObject/Terrains/Gimmick/MagneticArea/MagneticArea.h"
 #include"../../GameObject/Terrains//Gimmick/SignBoard/SignBoard.h"
