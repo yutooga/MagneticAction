@@ -3,8 +3,6 @@
 #include"../../../../Manager/ModelManager/ModelManager.h"
 
 const float Cage::k_correctionValue = 0.2f;
-const float Cage::k_moveSpeed = 0.5f;
-const float Cage::k_modelSize = 7.0f;
 const float Cage::k_sameForceColisionRadius = 80.f;
 const float Cage::k_differentForceColisionRadius = 100.f;
 
@@ -13,9 +11,11 @@ void Cage::Init()
 	// モデルの読み込み
 	if (!m_model)
 	{
-		m_model = std::make_shared<KdModelWork>();
-		m_model->SetModelData("Asset/Models/Terrains/Gimmick/Cate/Cate.gltf");
+		m_model = ModelManager::Instance().GetModel("Cage");
 	}
+
+	// 移動速度の初期化
+	m_moveSpeed = m_gimmickData["Cage"].value("MoveSpeed", 0.5f);
 
 	// デバック用初期化
 	m_randomId = rand();
@@ -26,6 +26,22 @@ void Cage::Init()
 	// 最初の座標を保存しておく
 	m_firstPos = m_pos;
 
+	// 表示色の初期化
+	m_color = {
+		m_gimmickData["Cage"].value("Color", 0.5f),
+		m_gimmickData["Cage"].value("Color", 0.5f),
+		m_gimmickData["Cage"].value("Color", 0.5f)
+	};
+
+	m_brightColor = {
+		m_gimmickData["Cage"].value("RgbMax", 1.f),
+		m_gimmickData["Cage"].value("RgbMax", 1.f),
+		m_gimmickData["Cage"].value("RgbMax", 1.f)
+	};
+
+	// モデルのサイズの初期化
+	m_modelSize = m_gimmickData["Cage"].value("ModelSize", 7.f);
+
 	m_pDebugWire = std::make_unique<KdDebugWireFrame>();
 
 	// 当たり判定の形状登録
@@ -35,9 +51,19 @@ void Cage::Init()
 
 void Cage::Update()
 {
+	// 表示色の更新
+	if ((m_maguneForce & MagunePowerN) != 0)	// N極の磁力をまとっているとき
+	{
+		m_brightColor = { m_gimmickData["Cage"].value("RgbMax", 1.f),0,0 };
+	}
+	else if ((m_maguneForce & MagunePowerS) != 0)	// S極の磁力をまとっているとき
+	{
+		m_brightColor = { 0,m_gimmickData["Cage"].value("RgbMax", 1.f),m_gimmickData["Cage"].value("RgbMax", 1.f) };
+	}
+
 	// 行列の確定
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
-	Math::Matrix scaleMat = Math::Matrix::CreateScale(k_modelSize);
+	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_modelSize);
 	Math::Matrix rotMat = Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_angle));
 	m_mWorld = scaleMat * rotMat * transMat;
 }
@@ -58,8 +84,7 @@ void Cage::PostUpdate()
 
 void Cage::DrawLit()
 {
-	Math::Color color = { 0.5f,0.5f,0.5f };
-	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, color);
+	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, m_color);
 }
 
 void Cage::DrawBright()
@@ -67,19 +92,7 @@ void Cage::DrawBright()
 	// 磁力をまとっていないなら早期リターン
 	if ((m_maguneForce & NoForce) != 0)return;
 
-	// S極の磁力をまとっているとき
-	if ((m_maguneForce & MagunePowerN) != 0)
-	{
-		Math::Color color = { 1,0,0};
-		KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, color);
-	}
-
-	// N極の磁力をまとっているとき
-	else if ((m_maguneForce & MagunePowerS) != 0)
-	{
-		Math::Color color = {0,1,1 };
-		KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, color);
-	}
+	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, m_brightColor);
 }
 
 
@@ -111,7 +124,7 @@ void Cage::OnHit(ObjectType _obj)
 	}
 }
 
-void Cage::CheckColision(const float _radius, ColisionOption _option)
+void Cage::CheckColision(const float _radius, const ColisionOption _option)
 {
 	//===============================
 	//              球判定
@@ -135,48 +148,49 @@ void Cage::CheckColision(const float _radius, ColisionOption _option)
 		bool hitFlg = false;
 		hitFlg = obj->Intersects(sphere, nullptr);
 
-		if (hitFlg && _option == ColisionOption::SameForce)
+		// 当たっていないなら以下処理しない
+		if (!hitFlg)continue;
+
+		switch (_option)
 		{
+		case ColisionOption::SameForce:
 			//同じ極の磁力をまとっているならHIT時の処理をする
 			if (m_maguneForce == obj->GetMaguneForce())
 			{
 				OnHit(obj->GetPos(), obj->GetMaguneForce());
 			}
-		}
-		else if (hitFlg && _option == ColisionOption::DifferentForce)
-		{
+			break;
+		case ColisionOption::DifferentForce:
 			//違う極の磁力をまとっているならHIT時の処理をする
 			if (m_maguneForce != obj->GetMaguneForce())
 			{
 				OnHit(obj->GetPos(), obj->GetMaguneForce());
 			}
+			break;
+		default:
+			break;
 		}
 	}
 }
 
 void Cage::OnHit(Math::Vector3 _pos, UINT _maguneForce)
 {
+	// 移動スピードの初期化
+	m_moveSpeed = m_gimmickData["Cage"].value("MoveSpeed", 0.5f);
+	Math::Vector3 moveDir;
+
 	// 自分と相手が同じ極の磁力をまとっているとき
 	if (m_maguneForce == _maguneForce)
 	{
-		// 移動スピードの初期化
-		m_moveSpeed = k_moveSpeed;
-
-		Math::Vector3 moveDir = m_pos - _pos;
-		moveDir.Normalize();
-
-		m_pos += moveDir * m_moveSpeed;
+		moveDir = m_pos - _pos;
 	}
 	// 違う極をまとっているとき
 	else if (m_maguneForce != _maguneForce)
 	{
-		// 移動スピードの初期化
-		m_moveSpeed = k_moveSpeed;
-
-		Math::Vector3 moveDir = m_firstPos - m_pos;
+		moveDir = m_firstPos - m_pos;
 		if (moveDir.Length() < m_moveSpeed + k_correctionValue)m_moveSpeed = 0;
-		moveDir.Normalize();
-
-		m_pos += moveDir * m_moveSpeed;
 	}
+
+	moveDir.Normalize();
+	m_pos += moveDir * m_moveSpeed;
 }

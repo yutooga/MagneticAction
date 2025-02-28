@@ -8,6 +8,9 @@ void Barb::Init()
 		m_model = ModelManager::Instance().GetModel("Barb");
 	}
 
+	// モデルのサイズの初期化
+	m_modelSize = m_gimmickData["Barb"].value("ModelSize", 8.f);
+
 	// 当たり判定の形状登録
 	m_pCollider = std::make_unique<KdCollider>();
 	m_pCollider->RegisterCollisionShape("Barb", m_model, KdCollider::TypeGround);

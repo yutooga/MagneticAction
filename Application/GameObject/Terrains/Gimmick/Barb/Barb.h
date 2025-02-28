@@ -17,6 +17,6 @@ public:
 
 private:
 
-
-	float m_modelSize = 8.0f;
+	// モデルのサイズ
+	float m_modelSize = 0.0f;
 };
