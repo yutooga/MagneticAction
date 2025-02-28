@@ -10,6 +10,15 @@ void CopperDoor::Init()
 		m_model = ModelManager::Instance().GetModel("CopperDoor");
 	}
 
+	// モデルの大きさの初期化
+	m_modelSize = m_gimmickData["CopperDoor"].value("ModelSize", 15.f);
+
+	// 回転角度の初期化
+	m_rotAngle = m_gimmickData["CopperDoor"].value("Angle", 90.f);
+
+	// 移動速度の初期化
+	m_moveSpeed = m_gimmickData["CopperDoor"].value("MoveSpeed", 1.f);
+
 	// IMGUI用の初期化
 	m_randomId = rand();
 

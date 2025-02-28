@@ -1,10 +1,5 @@
 ﻿#include "Coil.h"
-#include"../../../../Scene/SceneManager.h"
-#include"../../../Manager/GateManager/GateManager.h"
 #include"../../../../Manager/ModelManager/ModelManager.h"
-
-const float Coil::k_ColisionRadius = 60.f;
-const float Coil::k_ColisionAdjustValueY = 0.1f;
 
 void Coil::Init()
 {
@@ -13,6 +8,9 @@ void Coil::Init()
 	{
 		m_model = ModelManager::Instance().GetModel("Coil");
 	}
+
+	// モデルの大きさの初期化
+	m_modelSize = m_gimmickData["Coil"].value("ModelSize", 26.f);
 
 	// IMGUI用の値の初期化
 	m_randomId = rand();
@@ -32,12 +30,6 @@ void Coil::Update()
 	m_mWorld = scaleMat * rotMat * transMat;
 }
 
-void Coil::PostUpdate()
-{
-	//エリア内でプレイヤーが特定の行動をしているか判断する関数
-	JudgmentMove();
-}
-
 void Coil::DrawImGui()
 {
 	ImGui::PushID(m_randomId);
@@ -47,43 +39,4 @@ void Coil::DrawImGui()
 		ImGui::DragFloat("Coil size", &m_modelSize, 0.01f);
 	}
 	ImGui::PopID();
-}
-
-void Coil::JudgmentMove()
-{
-	//===============================
-	//              球判定
-	//===============================
-
-	//球判定用の変数を作成
-	KdCollider::SphereInfo sphere;
-
-	//球の中心位置を設定
-	sphere.m_sphere.Center = m_pos;
-	sphere.m_sphere.Center.y += k_ColisionAdjustValueY;
-	//球の半径を設定
-	sphere.m_sphere.Radius = k_ColisionRadius;
-	//当たり判定をしたいタイプを設定
-	sphere.m_type = KdCollider::TypeGround | KdCollider::TypeSight;
-
-	//当たり判定
-	for (auto& obj : SceneManager::Instance().GetObjList())
-	{
-		if (obj->GetObjType() != ObjectType::MoveMagunet)continue;
-		bool hitFlg = false;
-		hitFlg = obj->Intersects(sphere, nullptr);
-
-		if (hitFlg && obj->GetKeyObj()==KeyObject::Five)
-		{
-			//プレイヤーが電磁誘導を行っているならカメラのアニメーションを開始する
-			if (obj->GetReaction() == true)
-			{
-				
-			}	
-		}
-		else if(!hitFlg && obj->GetKeyObj() == KeyObject::Five)
-		{
-			
-		}
-	}
 }

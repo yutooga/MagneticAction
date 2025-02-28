@@ -5,7 +5,7 @@ class Gate : public TerrainsBase
 {
 public:
 	Gate(){}
-	~Gate(){}
+	~Gate()override{}
 
 	void Init()override;
 
@@ -23,7 +23,7 @@ private:
 	void GateOpen();
 
 	// モデルのサイズ
-	float m_modelSize = 16.5f;
+	float m_modelSize = 0.f;
 
 	// 門が開く動作のカウント
 	int m_count = 0;

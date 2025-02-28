@@ -10,6 +10,9 @@ void Gate::Init()
 		m_model = ModelManager::Instance().GetModel("Gate");
 	}
 
+	// モデルの大きさ
+	m_modelSize = m_gimmickData["Gate"].value("ModelSize", 16.5f);
+
 	//ImGui用のランダムなIdの生成
 	m_randomId = rand();
 
@@ -64,6 +67,6 @@ void Gate::GateOpen()
 	if (!m_seFlg)
 	{
 		m_seFlg = true;
-		KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/Gate/Gate.wav");
+		KdAudioManager::Instance().Play(m_gimmickData["Se"]["Gate"]["URL"]);
 	}
 }

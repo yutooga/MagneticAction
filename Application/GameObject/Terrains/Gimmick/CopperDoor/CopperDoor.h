@@ -18,14 +18,14 @@ public:
 private:
 
 	// モデルのサイズ
-	float m_modelSize = 15.0f;
+	float m_modelSize = 0.0f;
 
 	// 回転角度
-	float m_rotAngle = 90.f;
+	float m_rotAngle = 0.f;
 
 	// 更新角度
 	float m_angle = 0.0f;
 
 	// 移動スピード
-	float m_moveSpeed = 1.f;
+	float m_moveSpeed = 0.f;
 };

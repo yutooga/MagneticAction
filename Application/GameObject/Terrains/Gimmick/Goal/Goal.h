@@ -5,7 +5,7 @@ class Goal : public TerrainsBase
 {
 public:
 	Goal(){}
-	~Goal(){}
+	~Goal()override{}
 
 	void Init()override;
 
@@ -15,13 +15,11 @@ public:
 
 	void DrawImGui()override;
 
-	ObjectType GetObjType() { return ObjectType::Goal; }
-
-	static const float k_modelSize;	// モデルのサイズ
+	ObjectType GetObjType()override{ return ObjectType::Goal; }
 
 private:
 
-	// 座標をセットしたかどうか判断するフラグ
-	bool m_setFlg = false;
+	// モデルの大きさ
+	float m_modelSize = 0.f;
 
 };

@@ -433,8 +433,8 @@ void GameScene::LoadGimmickDefaultParam(const std::string& _filePath)
 				// ゴール初期化
 				//=====================================
 				std::shared_ptr<Goal> goal = std::make_shared<Goal>();
-				goal->Init();
 				goal->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
+				goal->Init();
 				m_objList.push_back(goal);
 				break;
 			}

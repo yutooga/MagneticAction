@@ -2,8 +2,6 @@
 #include"../../../Manager/GoalManager/GoalManager.h"
 #include"../../../../Manager/ModelManager/ModelManager.h"
 
-const float Goal::k_modelSize = 19.4f;
-
 void Goal::Init()
 {
 	// モデルの読み込み
@@ -15,6 +13,12 @@ void Goal::Init()
 	//ImGui用のランダムなIdの生成
 	m_randomId = rand();
 
+	// モデルの大きさの初期化
+	m_modelSize = m_gimmickData["Goal"].value("ModelSize", 19.4f);
+
+	// ゴールの位置を記憶させる
+	GoalManager::instance().SetGoalPos(m_pos);
+
 	// 当たり判定の形状登録
 	m_pCollider = std::make_unique<KdCollider>();
 	m_pCollider->RegisterCollisionShape("Goal", m_model, KdCollider::TypeGround | KdCollider::TypeDamage);
@@ -22,17 +26,10 @@ void Goal::Init()
 
 void Goal::Update()
 {
-	if (!m_setFlg)
-	{
-		m_setFlg = true;
-		// ゴールの位置を記憶させる
-		GoalManager::instance().SetGoalPos(m_pos);
-	}
-
 	// 行列の確定
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
-	Math::Matrix scaleMat = Math::Matrix::CreateScale(k_modelSize);
-	Math::Matrix rotMat = Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(90));
+	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_modelSize);
+	Math::Matrix rotMat = Math::Matrix::CreateRotationY(DirectX::XMConvertToRadians(m_gimmickData["Goal"].value("Angle", 90.f)));
 	m_mWorld = scaleMat * rotMat * transMat;
 }
 
