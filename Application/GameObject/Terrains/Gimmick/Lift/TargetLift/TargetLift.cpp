@@ -1,6 +1,6 @@
 ﻿#include "TargetLift.h"
-#include"../../../../Manager/ModelManager/ModelManager.h"
-#include"../../../Manager/UpdateObjManager/UpdateObjManager.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
+#include"../../../../Manager/UpdateObjManager/UpdateObjManager.h"
 
 void TargetLift::Init()
 {
@@ -18,6 +18,9 @@ void TargetLift::Init()
 
 	// ImGui用のランダムなIdの生成
 	m_randomId = rand();
+
+	// 動く速さの初期化
+	m_moveSpeed = m_gimmickData["TargetLift"].value("MoveSpeed", 2.0f);
 
 	// 当たり判定の形状登録
 	m_pDebugWire = std::make_unique<KdDebugWireFrame>();
@@ -40,10 +43,7 @@ void TargetLift::Update()
 	}
 
 	// 座標の更新
-	{
-		float moveSpeed = m_gimmickData["TargetLift"].value("MoveSpeed", 2.0f);
-		m_pos.z += sin(DirectX::XMConvertToRadians(m_angle)) * moveSpeed;
-	}
+	m_pos.z += sin(DirectX::XMConvertToRadians(m_angle)) * m_moveSpeed;
 
 
 	// 行列の確定

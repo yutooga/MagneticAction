@@ -37,7 +37,7 @@
 #include"../../GameObject/Terrains/Gimmick/Lift/WoodenLift/WoodenLift.h"
 #include"../../GameObject/Terrains/Gimmick/CopperDoor/CopperDoor.h"
 #include"../../GameObject/Terrains/Gimmick/Lift/JointLift/JointLift.h"
-#include"../../GameObject/Terrains/Gimmick/TargetLift/TargetLift.h"
+#include"../../GameObject/Terrains/Gimmick/Lift/TargetLift/TargetLift.h"
 #include"../../GameObject/Terrains/Gimmick/Wall/ObstructiveWall/ObstructiveWall.h"
 #include"../../GameObject/Terrains/Gimmick/Wall/StoneWall/StoneWall.h"
 #include"../../GameObject/Terrains/Gimmick/MagneBox/MagneBox.h"
