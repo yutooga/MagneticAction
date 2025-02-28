@@ -34,7 +34,7 @@
 #include"../../GameObject/Terrains/Gimmick/Cage/Cage.h"
 #include"../../GameObject/Terrains/Gimmick/CopperPillar/CopperPillar.h"
 #include"../../GameObject/Terrains/Gimmick/GoldPillar/GoldPillar.h"
-#include"../../GameObject/Terrains/Gimmick/WoodenLift/WoodenLift.h"
+#include"../../GameObject/Terrains/Gimmick/Lift/WoodenLift/WoodenLift.h"
 #include"../../GameObject/Terrains/Gimmick/CopperDoor/CopperDoor.h"
 #include"../../GameObject/Terrains/Gimmick/Lift/JointLift/JointLift.h"
 #include"../../GameObject/Terrains/Gimmick/TargetLift/TargetLift.h"

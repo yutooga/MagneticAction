@@ -1,11 +1,9 @@
 ﻿#include "WoodenLift.h"
-#include"../../../../Manager/ModelManager/ModelManager.h"
-#include"../../../../Scene/SceneManager.h"
-#include"../../../Manager/UpdateObjManager/UpdateObjManager.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
+#include"../../../../../Scene/SceneManager.h"
+#include"../../../../Manager/UpdateObjManager/UpdateObjManager.h"
 
-const float WoodenLift::k_colisionRadius = 19.1f;
 const float WoodenLift::k_distance = 17.5f;
-const float WoodenLift::k_colisionAdjustValueY = 0.1f;
 
 void WoodenLift::Init()
 {
@@ -14,6 +12,12 @@ void WoodenLift::Init()
 	{
 		m_model = ModelManager::Instance().GetModel("WoodenLift");
 	}
+
+	// モデルのサイズの初期化
+	m_modelSize = m_gimmickData["WoodenLift"].value("ModelSize", 7.6f);
+
+	// 動く速さの初期化
+	m_moveSpeed = m_gimmickData["WoodenLift"].value("MoveSpeed", 1.5f);
 
 	// IMGUI用の初期化
 	m_randomId = rand();
@@ -48,7 +52,7 @@ void WoodenLift::Update()
 	}
 
 	// 座標更新
-	m_pos.z += sin(DirectX::XMConvertToRadians(m_angle))*m_moveSpeed;
+	m_pos.z += sin(DirectX::XMConvertToRadians(m_angle)) * m_moveSpeed;
 
 
 	// 行列の確定
@@ -89,9 +93,9 @@ void WoodenLift::JudgementPlayer()
 
 	//球の中心位置を設定
 	sphere.m_sphere.Center = m_pos;
-	sphere.m_sphere.Center.y += k_colisionAdjustValueY;
+	sphere.m_sphere.Center.y += m_gimmickData["WoodenLift"]["Colision"].value("AdjustY", 0.1f);
 	//球の半径を設定
-	sphere.m_sphere.Radius = k_colisionRadius;
+	sphere.m_sphere.Radius = m_gimmickData["WoodenLift"]["Colision"].value("Radius", 19.1f);
 	//当たり判定をしたいタイプを設定
 	sphere.m_type = KdCollider::TypeSight;
 
@@ -106,6 +110,7 @@ void WoodenLift::JudgementPlayer()
 
 		if (hitFlg)
 		{
+			// 一定の距離にプレイヤーがいるならプレイヤーをリフトに追従させる
 			if ((obj->GetPos().y - m_pos.y) >= k_distance)
 			{
 				Math::Vector3 playerPos = obj->GetPos();
