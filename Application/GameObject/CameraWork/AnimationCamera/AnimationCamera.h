@@ -8,7 +8,7 @@ public:
 	AnimationCamera(){}
 	~AnimationCamera()override{}
 
-	void Init()override;
+	void Init()override{}
 
 	void Update()override;
 

@@ -6,7 +6,7 @@ class SignBoard : public KdGameObject
 {
 public:
 	SignBoard(){}
-	~SignBoard(){}
+	~SignBoard()override{}
 
 	enum class TextOption
 	{
@@ -53,8 +53,10 @@ private:
 	// 表示画像切り替えフラグ
 	bool m_changeFlg = false;
 
+	// アニメーションの最大コマ
 	float m_animationCntMax = 0.0f;
 
+	// アニメーション管理カウント
 	float m_animationCnt = 0.f;
 
 	// プレイヤーの実体

@@ -9,6 +9,9 @@ void Rail::Init()
 		m_model = ModelManager::Instance().GetModel("Rail");
 	}
 
+	// モデルの大きさの初期化
+	m_modelSize = m_gimmickData["Rail"].value("ModelSize", 20.7f);
+
 	// IMGUI用の初期化
 	m_randomId = rand();
 

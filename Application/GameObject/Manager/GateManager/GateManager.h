@@ -22,7 +22,7 @@ public:
 	//現在の状況取得
 	const State GetNowState() const { return m_nowState; }
 	// 状態変更関数
-	void SetState(State _nextState) { m_nowState = _nextState; }
+	void SetState(const State _nextState) { m_nowState = _nextState; }
 
 	// 電磁誘導の状態を取得する関数
 	const bool GetElectromagneticInduction()const { return m_electromagneticInductionFlg; }

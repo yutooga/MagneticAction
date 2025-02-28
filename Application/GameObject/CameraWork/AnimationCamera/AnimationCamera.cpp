@@ -4,10 +4,6 @@
 
 const float AnimationCamera::k_end = 1.f;
 
-void AnimationCamera::Init()
-{
-}
-
 void AnimationCamera::Update()
 {
 	// 二点間の補完処理を行う

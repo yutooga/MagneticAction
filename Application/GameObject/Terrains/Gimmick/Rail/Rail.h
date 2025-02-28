@@ -20,7 +20,7 @@ public:
 private:
 
 	// モデルのサイズ
-	float m_modelSize = 20.7f;
+	float m_modelSize = 0.f;
 	
 	// 回転角度
 	float m_angle = 0.0f;

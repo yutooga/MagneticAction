@@ -225,7 +225,7 @@ void Player::OnHit(ObjectType _obj)
 		if(m_seInterval==0)
 		{
 			// SE再生
-			KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/DeathFloor/DeathFloor.wav", false);
+			KdAudioManager::Instance().Play(m_jsonData["Se"]["DeathFloor"]["URL"], false);
 			m_hp.lock()->DecreaseHp();
 			// SE再生のクールタイムの設定
 			int coolTime = m_jsonData["SeCoolTime"];
@@ -425,7 +425,7 @@ void Player::Player_TerrainSphereColision()
 			if (m_seInterval != 0)continue;
 			
 			// SE再生
-			KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/DeathFloor/DeathFloor.wav", false);
+			KdAudioManager::Instance().Play(m_jsonData["Se"]["DeathFloor"]["URL"], false);
 			if (m_hp.expired() == false)
 			{
 				// HP減算処理
@@ -650,7 +650,7 @@ void Player::GameOverPlayer()
 		// 音関係を全て止める
 		KdAudioManager::Instance().StopAllSound();
 		// ゲームオーバーのSEを流す
-		KdAudioManager::Instance().Play("Asset/Sounds/GameScene/SE/2DObject/GameOver/GameOver.wav");
+		KdAudioManager::Instance().Play(m_jsonData["Se"]["GameOver"]["URL"]);
 	}
 }
 
@@ -752,7 +752,7 @@ void Player::OnHit(ObjectType _objType, const std::weak_ptr<KdGameObject>& _obj)
 		if ((m_maguneForce != MagunePowerS) && (!_obj.lock()->GetReaction()))
 		{
 			//SE再生
-			KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/MagicRing/Magic.wav");
+			KdAudioManager::Instance().Play(m_jsonData["Se"]["MagicRing"]["URL"]);
 			m_maguneForce = MagunePowerS;
 			_obj.lock()->SetUpdate(true);
 			_obj.lock()->SetReaction(true);
@@ -765,7 +765,7 @@ void Player::OnHit(ObjectType _objType, const std::weak_ptr<KdGameObject>& _obj)
 		if ((m_maguneForce != MagunePowerN) && (!_obj.lock()->GetReaction()))
 		{
 			//SE再生
-			KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/MagicRing/Magic.wav");
+			KdAudioManager::Instance().Play(m_jsonData["Se"]["MagicRing"]["URL"]);
 			m_maguneForce = MagunePowerN;
 			_obj.lock()->SetUpdate(true);
 			_obj.lock()->SetReaction(true);

@@ -5,7 +5,7 @@ void SignBoard::Init()
 {
 	// jsonファイルから情報を読み込んでくる
 
-	std::ifstream ifs("Asset/Data/2DObject/SignBoard/SignBoard.json");
+	std::ifstream ifs("Asset/Data/GameScene/3DObject/Terrains/Gimmick/SignBoardData/SignBoard.json");
 	if (ifs) {
 		ifs >> m_signBoardData;
 	}
@@ -77,22 +77,26 @@ void SignBoard::DrawImGui()
 
 void SignBoard::SetTexture(const TextOption& _option, const float _scale, const int _splitX, const int _splitY)
 {
+	// 既に画像が読み込んでいるなら処理しない
 	if (m_text)return;
+
 	m_text = std::make_shared<KdSquarePolygon>();
+
 	switch (_option)
 	{
 	case TextOption::GetGun:
-		m_text->SetMaterial("Asset/Textures/Scene/GameScene/2DObject/SignBoard/GetGun.png");
+		m_text->SetMaterial(m_signBoardData["Texture"]["GetGun"]["URL"]);
 		break;
 	case TextOption::ElectroMagneticInduction:
-		m_text->SetMaterial("Asset/Textures/Scene/GameScene/2DObject/SignBoard/ElectroMagneticInduction.png");
+		m_text->SetMaterial(m_signBoardData["Texture"]["Electro"]["URL"]);
 		break;
 	case TextOption::MagneGun:
-		m_text->SetMaterial("Asset/Textures/Scene/GameScene/2DObject/SignBoard/MagneGun.png");
+		m_text->SetMaterial(m_signBoardData["Texture"]["MagneGun"]["URL"]);
 		break;
 	default:
 		break;
 	}
+
 	m_text->SetScale(_scale);
 	m_text->SetSplit(_splitX,_splitY);
 	m_animationCntMax = static_cast<float>(_splitX);
@@ -111,6 +115,8 @@ void SignBoard::TextureUpdate()
 void SignBoard::Animation()
 {
 	m_animationCnt += m_signBoardData["Animation"].value("AddValue", 0.1f);
+
+	// アニメーションが最後のコマまでいったら最初のコマに戻す
 	if (m_animationCnt > m_animationCntMax)
 	{
 		m_animationCnt = 0;

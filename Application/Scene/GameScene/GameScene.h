@@ -60,6 +60,9 @@ private:
 	// 門の開閉アニメーション関数
 	void OpenGateAnimation();
 
+	// シーン遷移処理
+	void ChangeNextScene();
+
 	//特定のオブジェクト検索関数
 	std::shared_ptr<KdGameObject> FindObject(const KdGameObject::ObjectType _obj);
 	// 次のカメラのターゲットを検索
@@ -83,6 +86,34 @@ private:
 		posZ
 	};
 
+	enum class GimmickDataForSpecial
+	{
+		modelSize = 4,
+		angle,
+		scope,
+		adjustValue,
+		width
+	};
+
+	enum class MoveFloor
+	{
+		moveMax = 4,
+		keyObjNum,
+		force
+	};
+
+	enum class Effect
+	{
+		endPosX = 4,
+		endPosY,
+		endPosZ,
+		middleX,
+		middleY,
+		middleZ,
+		target = 7,
+		endTarget = 10
+	};
+
 	// 各オブジェクトの実体
 	std::weak_ptr<HP> m_hp;
 	std::weak_ptr<Player> m_player;
@@ -97,4 +128,7 @@ private:
 
 	// 現在のカメラのターゲット
 	KdGameObject::ObjectType m_nowCamTarget = KdGameObject::ObjectType::Player;
+
+	// jsonファイルのデータを格納する変数
+	nlohmann::json m_jsonData;
 };

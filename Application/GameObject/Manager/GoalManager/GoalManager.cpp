@@ -7,19 +7,23 @@ void GoalManager::CreateClearText()
 {
 	//BGMの初期化
 	KdAudioManager::Instance().StopAllSound();
-	KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Clear/clear.wav",true);
+	KdAudioManager::Instance().Play("Asset/Sounds/GameScene/SE/Clear/clear.wav",true);
 
 	//===================================
 	// フェードイン初期化
 	//===================================
-	std::shared_ptr<GameFadeIn> fadein = std::make_shared<GameFadeIn>();
-	fadein->Init();
-	SceneManager::Instance().AddObject(fadein);
+	{
+		std::shared_ptr<GameFadeIn> fadein = std::make_shared<GameFadeIn>();
+		fadein->Init();
+		SceneManager::Instance().AddObject(fadein);
+	}
 	
 	//===================================
 	// ClearText初期化
 	//===================================
-	std::shared_ptr<ClearText> clear = std::make_shared<ClearText>();
-	clear->Init();
-	SceneManager::Instance().AddObject(clear);
+	{
+		std::shared_ptr<ClearText> clear = std::make_shared<ClearText>();
+		clear->Init();
+		SceneManager::Instance().AddObject(clear);
+	}
 }

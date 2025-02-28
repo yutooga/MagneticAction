@@ -15,10 +15,6 @@ public:
 
 	void DrawImGui()override;
 
-	static const float k_seCoolTime;	// SE再生のクールタイム
-
-	static const float k_colisionRadius;	// 当たり判定の球の半径
-
 	static const float k_colisionAdjustValueY;	// 当たり判定のY座標の補正値
 
 private:
@@ -26,11 +22,8 @@ private:
 	// セーブポイントとプレイヤーとの当たり判定
 	void SavePoint_Player();
 
-	// SE更新関数
-	void CountDownSE();
-
 	// モデルのサイズ
-	float m_modelSize = 28.3f;
+	float m_modelSize = 0.f;
 
 	//プレイヤーがエリア内に入っているか判断フラグ
 	bool m_rangeFlg = false;

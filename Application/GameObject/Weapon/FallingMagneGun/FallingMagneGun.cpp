@@ -212,6 +212,6 @@ void FallingMagneGun::GetMagneGun()
 		KdEffekseerManager::GetInstance().StopEffect(m_effectName, m_firstPos);
 
 		//銃取得のSE再生
-		KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Weapon/FallingMaguneGun/Acquisition.wav", false);
+		KdAudioManager::Instance().Play(m_magneGunData["Se"]["URL"], false);
 	}
 }

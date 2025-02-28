@@ -30,9 +30,9 @@ public:
 	}
 
 	//ゴールの位置設定関数
-	void SetGoalPos(Math::Vector3& _pos) { m_goalPos = _pos; }
+	void SetGoalPos(const Math::Vector3& _pos) { m_goalPos = _pos; }
 	//ゴールの位置取得関数
-	Math::Vector3 GetGoalPos() { return m_goalPos; }
+	const Math::Vector3 GetGoalPos()const { return m_goalPos; }
 	
 
 private:

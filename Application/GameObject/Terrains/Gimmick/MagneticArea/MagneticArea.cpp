@@ -1,12 +1,12 @@
 ﻿#include "MagneticArea.h"
+#include"../../../../Manager/ModelManager/ModelManager.h"
 
 void MagnaticArea::Init()
 {
 	// モデルの読み込み
 	if (!m_model)
 	{
-		m_model = std::make_shared<KdModelWork>();
-		m_model->SetModelData("Asset/Models/Terrains/Gimmick/MagneticArea/MagneticArea.gltf");
+		m_model = ModelManager::Instance().GetModel("MagnaticArea");
 	}
 
 	// 当たり判定の形状登録

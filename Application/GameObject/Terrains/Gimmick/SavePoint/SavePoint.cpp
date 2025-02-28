@@ -2,8 +2,6 @@
 #include"../../../../Scene/SceneManager.h"
 #include"../../../../Manager/ModelManager/ModelManager.h"
 
-const float SavePoint::k_seCoolTime = 60.0f;
-const float SavePoint::k_colisionRadius = 3.0f;
 const float SavePoint::k_colisionAdjustValueY = 4.5f;
 
 void SavePoint::Init()
@@ -11,21 +9,21 @@ void SavePoint::Init()
 	// モデルの読み込み
 	if(!m_model)
 	{
-		m_model = std::make_shared<KdModelWork>();
-		m_model->SetModelData("Asset/Models/Terrains/Gimmick/SavePoint/Crystal.gltf");
+		m_model = ModelManager::Instance().GetModel("SavePoint");
 	}
+
+	// モデルの大きさの初期化
+	m_modelSize = m_gimmickData["SavePoint"].value("ModelSize", 28.3f);
 
 	//ImGui用のランダムなIdの生成
 	m_randomId = rand();
 
+	// デバックラインの初期化
 	m_pDebugWire = std::make_unique<KdDebugWireFrame>();
 }
 
 void SavePoint::Update()
 {
-	// SEの更新処理
-	//CountDownSE();
-
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
 	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_modelSize);
 	m_mWorld = scaleMat * transMat;
@@ -67,7 +65,7 @@ void SavePoint::SavePoint_Player()
 	sphere.m_sphere.Center.y += k_colisionAdjustValueY;
 
 	//球の半径を設定
-	sphere.m_sphere.Radius = k_colisionRadius;
+	sphere.m_sphere.Radius = m_gimmickData["SavePoint"]["Colision"].value("Radius", 3.f);
 
 	//当たり判定をしたいタイプを設定
 	sphere.m_type = KdCollider::TypeSight;
@@ -88,32 +86,21 @@ void SavePoint::SavePoint_Player()
 		{
 			m_rangeFlg = true;
 			obj->OnHit(ObjectType::SavePoint);
+
+			// SE再生
 			if (!m_seFlg)
 			{
 				m_seFlg = true;
-				m_seInterval = k_seCoolTime;
-				KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Terrains/Gimmick/SavePoint/SavePoint.wav", false);
+				m_seInterval = m_gimmickData["SavePoint"].value("CoolTime", 60.f);
+				KdAudioManager::Instance().Play(m_gimmickData["Se"]["SavePoint"]["URL"], false);
 			}
+			break;
 		}
-		else if (!hitFlg)
+		else
 		{
 			m_seFlg = false;
+			break;
 		}
-	}
-
-	
-}
-
-void SavePoint::CountDownSE()
-{
-	// フラグがOFFの時は早期リターン
-	if (!m_seFlg)return;
-
-	m_seInterval--;
-	if (m_seInterval <= 0)
-	{
-		m_seInterval = 0;
-		m_seFlg = false;
 	}
 }
 

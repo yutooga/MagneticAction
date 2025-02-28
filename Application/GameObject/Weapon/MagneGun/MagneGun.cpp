@@ -201,5 +201,5 @@ void MagneGun::Shot(const std::shared_ptr<const Player>& _parent,const UINT& _ma
 
 
 	// SE再生
-	KdAudioManager::Instance().Play("Asset/Sounds/GameScene/Weapon/MaguneGun/MaguneGun.wav", false);
+	KdAudioManager::Instance().Play(m_magneGunData["Se"]["URL"], false);
 }

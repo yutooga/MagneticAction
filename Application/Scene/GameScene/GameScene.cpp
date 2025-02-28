@@ -25,7 +25,6 @@
 #include"../../GameObject/Terrains/Gimmick/Gate/Gate.h"
 #include"../../GameObject/Terrains/Gimmick/Wall/GateWall/GateWall.h"
 #include"../../GameObject/Terrains/Gimmick/Floor/MoveMagneFloor/MoveMagneFloor.h"
-#include"../../GameObject/Terrains/Gimmick/Ramparts/Ramparts.h"
 #include"../../GameObject/Terrains/Gimmick/Floor/MagneticFloor/MagneticFloor.h"
 #include"../../GameObject/Terrains/Gimmick/Wall/MagneWall/MagneWall.h"
 #include"../../GameObject/Terrains/Gimmick/Rail/Rail.h"
@@ -95,7 +94,7 @@ void GameScene::Update()
 		SetCursorPos(static_cast<int>(k_cursorPos.x), static_cast<int>(k_cursorPos.y));
 		return;
 	}
-	// ゴールしてないときのみポーズできる5
+	// ゴールしてないときのみポーズできる
 	else if(!GoalManager::instance().GetClearState())
 	{
 		//ポーズ状態（にする/を解除する）処理
@@ -106,7 +105,7 @@ void GameScene::Update()
 				m_pushFlg = true;
 				if (!m_pauseFlg)
 				{
-					KdAudioManager::Instance().Play("Asset/Sounds/GameScene/SE/2DObject/Pause/open.wav", false);
+					KdAudioManager::Instance().Play(m_jsonData["Se"]["Pause"]["URL"], false);
 
 					m_pauseFlg = true;
 					std::shared_ptr<Pause> pause = std::make_shared<Pause>();
@@ -140,56 +139,8 @@ void GameScene::Event()
 	// エフェクトの更新
 	KdEffekseerManager::GetInstance().Update();
 
-	//プレイヤーがゴールした時リザルト画面へ移行する
-	if (m_player.expired() == false)
-	{
-		if (GoalManager::instance().GetClearState()==true)
-		{
-			if (GetAsyncKeyState(VK_RETURN) & 0x8000)
-			{
-				if (!m_pushEnterFlg)
-				{
-					if (m_hp.expired() == false)
-					{
-						ScoreManager::instance().RegisterClearHp(m_hp.lock()->GetHpNum());
-						ScoreManager::instance().ConversionScore();
-					}
-
-					SceneManager::Instance().SetNextScene
-					(
-						SceneManager::SceneType::Result
-					);
-					StartManager::instance().SetStartState(false);
-					m_pushEnterFlg = true;
-				}
-			}
-			else
-			{
-				m_pushEnterFlg = false;
-			}
-		}
-		// HPが０になった場合
-		else if (m_player.lock()->GetGameOver() == true)
-		{
-			// タイトル画面に戻る処理
-			if (GetAsyncKeyState(VK_RETURN) & 0x8000)
-			{
-				if (!m_pushEnterFlg)
-				{
-					SceneManager::Instance().SetNextScene
-					(
-						SceneManager::SceneType::Title
-					);
-					StartManager::instance().SetStartState(false);
-					m_pushEnterFlg = true;
-				}
-			}
-			else
-			{
-				m_pushEnterFlg = false;
-			}
-		}
-	}
+	// 次のシーンへの遷移処理
+	ChangeNextScene();
 
 	// 門のギミックの開閉アニメーション関数
 	OpenGateAnimation();
@@ -199,109 +150,151 @@ void GameScene::Event()
 }
 void GameScene::Init()
 {
+	// jsonファイルからデータを読み込んでくる
+	if (m_jsonData.empty()) {
+		std::ifstream ifs("Asset/Data/GameScene/GameSceneData.json");
+		if (ifs) {
+			ifs >> m_jsonData;
+		}
+	}
+
 	// エフェクトの初期化
-	int width = 1280;
-	int height = 720;
-	KdEffekseerManager::GetInstance().Create(width, height);
+	{
+		int width = m_jsonData["Effect"].value("Width", 1280);
+		int height = m_jsonData["Effect"].value("Height", 720);
+		KdEffekseerManager::GetInstance().Create(width, height);
+	}
 
 	// BGM SEの初期化
 	KdAudioManager::Instance().StopAllSound();
-	KdAudioManager::Instance().Play("Asset/Sounds/GameScene/BGM/BGM.wav",true);
+	KdAudioManager::Instance().Play(m_jsonData["Bgm"]["URL"], true);
 
 
-	ModelManager::Instance().LoadModelFromCSVAsync("Asset/Data/ModelURLData/GameSceneModel.csv");
+	ModelManager::Instance().LoadModelFromCSVAsync(m_jsonData["ModelData"]["URL"]);
 
 	//=====================================
 	//　フェードアウト初期化
 	//=====================================
-	std::shared_ptr<GameFadeOut> out = std::make_shared<GameFadeOut>();
-	out->Init();
-	m_objList.push_back(out);
+	{
+		std::shared_ptr<GameFadeOut> out = std::make_shared<GameFadeOut>();
+		out->Init();
+		m_objList.push_back(out);
+	}
 
 	//=====================================
 	//　カウントダウン初期化
 	//=====================================
-	std::shared_ptr<CountDown> count = std::make_shared<CountDown>();
-	count->Init();
-	m_objList.push_back(count);
+	{
+		std::shared_ptr<CountDown> count = std::make_shared<CountDown>();
+		count->Init();
+		m_objList.push_back(count);
+	}
 
 	//=====================================
 	// 背景初期化
 	//=====================================
-	std::shared_ptr<BackGround> background = std::make_shared<BackGround>();
-	background->Init();
-	background->SetOption(BackGround::Option::NormalMode);
-	m_objList.push_back(background);
+	{
+		std::shared_ptr<BackGround> background = std::make_shared<BackGround>();
+		background->Init();
+		background->SetOption(BackGround::Option::NormalMode);
+		m_objList.push_back(background);
+	}
 
 	//=====================================
 	// HP初期化
 	//=====================================
-	std::shared_ptr<HP> hp = std::make_shared<HP>();
-	hp->Init();
-	m_hp = hp;
-	m_objList.push_back(hp);
+
+	std::shared_ptr<HP> spHp;
+
+	{
+		std::shared_ptr<HP> hp = std::make_shared<HP>();
+		hp->Init();
+		m_hp = hp;
+		m_objList.push_back(hp);
+		spHp = hp;
+	}
 	
 	//=====================================
 	// 地面初期化
 	//=====================================
-	std::shared_ptr<Ground> ground = std::make_shared<Ground>();
-	ground->Init();
-	m_objList.push_back(ground);
+	{
+		std::shared_ptr<Ground> ground = std::make_shared<Ground>();
+		ground->Init();
+		m_objList.push_back(ground);
+	}
 
 	//=====================================
 	// プレイヤー初期化
 	//=====================================
-	std::shared_ptr<Player> player = std::make_shared<Player>();
-	player->Init();
-	player->SetHp(hp);
-	m_player = player;
-	m_objList.push_back(player);
+
+	std::shared_ptr<Player> spPlayer;
+
+	{
+		std::shared_ptr<Player> player = std::make_shared<Player>();
+		player->Init();
+		player->SetHp(spHp);
+		m_player = player;
+		spPlayer = player;
+		m_objList.push_back(player);
+	}
 
 	//=====================================
 	// プレイヤーのまとっている磁極初期化
 	//=====================================
-	std::shared_ptr<MagunePower> power = std::make_shared<MagunePower>();
-	power->SetPlayer(player);
-	power->Init();
-	m_objList.push_back(power);
+	{
+		std::shared_ptr<MagunePower> power = std::make_shared<MagunePower>();
+		power->SetPlayer(spPlayer);
+		power->Init();
+		m_objList.push_back(power);
+	}
 
 	//=====================================
 	// 落ちているマグネット銃初期化
 	//=====================================
-	std::shared_ptr<FallingMagneGun> fallingGun = std::make_shared<FallingMagneGun>();
-	fallingGun->Init();
-	fallingGun->SetPlayer(player);
-	m_objList.push_back(fallingGun);
+
+	std::shared_ptr<FallingMagneGun> spFallingMagneGun;
+
+	{
+		std::shared_ptr<FallingMagneGun> fallingGun = std::make_shared<FallingMagneGun>();
+		fallingGun->Init();
+		fallingGun->SetPlayer(spPlayer);
+		m_objList.push_back(fallingGun);
+		spFallingMagneGun = fallingGun;
+	}
 
 	//=====================================
 	// ギミック初期化
 	//=====================================
 
-	LoadMoveFloorGimmickParam("Asset/Data/Gimmick/GimmickPositionData/MoveFloorGimmick.csv");
+	LoadMoveFloorGimmickParam(m_jsonData["MoveFloorData"]["URL"]);
 
-	LoadGimmickDefaultParam("Asset/Data/Gimmick/GimmickPositionData/NormalParamGimmick.csv");
+	LoadGimmickDefaultParam(m_jsonData["DefaultGimmickData"]["URL"]);
 
-	LoadGimmickSpecialParam("Asset/Data/Gimmick/GimmickPositionData/SpecialParamGimmick.csv");
+	LoadGimmickSpecialParam(m_jsonData["SpecialGimmickData"]["URL"]);
 
-	LoadElectricityEffectObjectParam("Asset/Data/Gimmick/GimmickPositionData/ElectricityEffectObject.csv");
+	LoadElectricityEffectObjectParam(m_jsonData["EffectData"]["URL"]);
 
 	//=====================================
 	// マグネット銃初期化
 	//=====================================
-	std::shared_ptr<MagneGun> gun = std::make_shared<MagneGun>();
-	gun->Init();
-	gun->SetParent(player);
-	fallingGun->SetMagneGun(gun);
-	m_objList.push_back(gun);
+	{
+		std::shared_ptr<MagneGun> gun = std::make_shared<MagneGun>();
+		gun->Init();
+		gun->SetParent(spPlayer);
+		spFallingMagneGun->SetMagneGun(gun);
+		m_objList.push_back(gun);
+	}
 
 	//=====================================
 	// カメラ初期化
 	//=====================================
-	std::shared_ptr<FPSCamera> camera = std::make_shared<FPSCamera>();
-	camera->Init();
-	camera->SetTarget(player);
-	m_wpCamera = camera;
-	m_objList.push_back(camera);
+	{
+		std::shared_ptr<FPSCamera> camera = std::make_shared<FPSCamera>();
+		camera->Init();
+		camera->SetTarget(spPlayer);
+		m_wpCamera = camera;
+		m_objList.push_back(camera);
+	}
 }
 
 void GameScene::LoadGimmickDefaultParam(const std::string& _filePath)
@@ -492,7 +485,6 @@ void GameScene::LoadGimmickDefaultParam(const std::string& _filePath)
 					DeathFloor::MoveState::change, KdGameObject::ObjectType::MovingDeathFloor);
 				break;
 			}
-			break;
 			case 20:
 			{
 				//=====================================
@@ -680,7 +672,7 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				std::shared_ptr<Coil> coil = std::make_shared<Coil>();
 				coil->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				coil->Init();
-				coil->SetRotAngle(row[5]);
+				coil->SetRotAngle(row[static_cast<unsigned int>(GimmickDataForSpecial::angle)]);
 				m_objList.push_back(coil);
 				break;
 			}
@@ -692,7 +684,7 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				std::shared_ptr<LongScaffold> scaffold = std::make_shared<LongScaffold>();
 				scaffold->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				scaffold->Init();
-				scaffold->SetWidth(row[8]);
+				scaffold->SetWidth(row[static_cast<unsigned int>(GimmickDataForSpecial::width)]);
 				m_objList.push_back(scaffold);
 				break;
 			}
@@ -703,8 +695,8 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				//=====================================
 				std::shared_ptr<Conductor> conductor = std::make_shared<Conductor>();
 				conductor->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				conductor->SetModelSize(row[4]);
-				conductor->SetAngle(row[5]);
+				conductor->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
+				conductor->SetAngle(row[static_cast<unsigned int>(GimmickDataForSpecial::angle)]);
 				conductor->Init();
 				m_objList.push_back(conductor);
 				break;
@@ -716,11 +708,11 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				//=====================================
 				std::shared_ptr<MaguneticFloor> floor = std::make_shared<MaguneticFloor>();
 				floor->Init();
-				floor->SetModelSize(row[4]);
-				floor->SetAdjustAdValue(row[7]);
-				if (row[6] != 0)
+				floor->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
+				floor->SetAdjustAdValue(row[static_cast<unsigned int>(GimmickDataForSpecial::adjustValue)]);
+				if (row[static_cast<unsigned int>(GimmickDataForSpecial::scope)] != 0)
 				{
-					floor->SetScope(row[6]);
+					floor->SetScope(row[static_cast<unsigned int>(GimmickDataForSpecial::scope)]);
 				}
 				floor->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				floor->SetMaguneForce(KdGameObject::MagunePowerS);
@@ -734,7 +726,7 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				//=====================================
 				std::shared_ptr<MaguneticFloor> floor = std::make_shared<MaguneticFloor>();
 				floor->Init();
-				floor->SetModelSize(row[4]);
+				floor->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
 				floor->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				floor->SetMaguneForce(KdGameObject::NoForce);
 				m_objList.push_back(floor);
@@ -747,7 +739,7 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				//=====================================
 				std::shared_ptr<Rail> rail = std::make_shared<Rail>();
 				rail->Init();
-				rail->SetRotAngle(row[5]);
+				rail->SetRotAngle(row[static_cast<unsigned int>(GimmickDataForSpecial::angle)]);
 				rail->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				m_objList.push_back(rail);
 				break;
@@ -761,7 +753,7 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				cage->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				cage->Init();
 				// 回転角度をセット
-				cage->SetAngle(row[5]);
+				cage->SetAngle(row[static_cast<unsigned int>(GimmickDataForSpecial::angle)]);
 				m_objList.push_back(cage);
 				break;
 			}
@@ -773,7 +765,7 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				std::shared_ptr<CopperPillar> pillar = std::make_shared<CopperPillar>();
 				pillar->Init();
 				pillar->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				pillar->SetModelSize(row[4]);
+				pillar->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
 				m_objList.push_back(pillar);
 				break;
 			}
@@ -785,8 +777,8 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				std::shared_ptr<LongScaffold> scaffold = std::make_shared<LongScaffold>();
 				scaffold->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				scaffold->Init();
-				scaffold->SetWidth(row[8]);
-				scaffold->SetRotAngle(row[5]);
+				scaffold->SetWidth(row[static_cast<unsigned int>(GimmickDataForSpecial::width)]);
+				scaffold->SetRotAngle(row[static_cast<unsigned int>(GimmickDataForSpecial::angle)]);
 				m_objList.push_back(scaffold);
 				break;
 			}
@@ -798,9 +790,9 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				std::shared_ptr<MaguneticFloor> floor = std::make_shared<MaguneticFloor>();
 				floor->Init();
 				floor->SetUpdate(true);
-				floor->SetModelSize(row[4]);
-				floor->SetScope(row[6]);
-				floor->SetAdjustAdValue(row[7]);
+				floor->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
+				floor->SetScope(row[static_cast<unsigned int>(GimmickDataForSpecial::scope)]);
+				floor->SetAdjustAdValue(row[static_cast<unsigned int>(GimmickDataForSpecial::adjustValue)]);
 				floor->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				floor->SetMaguneForce(KdGameObject::MagunePowerN);
 				m_objList.push_back(floor);
@@ -814,8 +806,8 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				std::shared_ptr<StoneWall> wall = std::make_shared<StoneWall>();
 				wall->Init();
 				wall->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				wall->SetModelSize(7.0f);
-				wall->SetAngle(row[5]);
+				wall->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
+				wall->SetAngle(row[static_cast<unsigned int>(GimmickDataForSpecial::angle)]);
 				m_objList.push_back(wall);
 				break;
 			}
@@ -829,7 +821,7 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				wall->Init();
 				wall->SetSize(MovingWall::Size::Small);
 				wall->SetObjType(KdGameObject::ObjectType::MovingWall);
-				wall->SetRotAngle(row[5]);
+				wall->SetRotAngle(row[static_cast<unsigned int>(GimmickDataForSpecial::angle)]);
 				m_objList.push_back(wall);
 				break;
 			}
@@ -841,7 +833,7 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				std::shared_ptr<GoldPillar> pillar = std::make_shared<GoldPillar>();
 				pillar->Init();
 				pillar->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				pillar->SetModelSize(row[4]);
+				pillar->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
 				m_objList.push_back(pillar);
 				break;
 			}
@@ -853,8 +845,8 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				std::shared_ptr<MagnaticArea> Area = std::make_shared<MagnaticArea>();
 				Area->Init();
 				Area->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				Area->SetModelSize(row[4]);
-				Area->SetAngle(row[5]);
+				Area->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
+				Area->SetAngle(row[static_cast<unsigned int>(GimmickDataForSpecial::angle)]);
 				m_objList.push_back(Area);
 				m_gimmickList.push_back(Area);
 				break;
@@ -867,7 +859,7 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				std::shared_ptr<ShortScaffold> scaffold = std::make_shared<ShortScaffold>();
 				scaffold->Init();
 				scaffold->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				scaffold->SetModelSize(row[4]);
+				scaffold->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
 				m_objList.push_back(scaffold);
 				break;
 			}
@@ -896,8 +888,8 @@ void GameScene::LoadMoveFloorGimmickParam(const std::string& _filePath)
 				std::shared_ptr<TargetLift> lift = std::make_shared<TargetLift>();
 				lift->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				lift->Init();
-				lift->SetKeyObj(static_cast<int>(row[5]));
-				lift->SetMaguneForce(static_cast<int>(row[6]));
+				lift->SetKeyObj(static_cast<int>(row[static_cast<unsigned int>(MoveFloor::keyObjNum)]));
+				lift->SetMaguneForce(static_cast<int>(row[static_cast<unsigned int>(MoveFloor::force)]));
 				m_objList.push_back(lift);
 				break;
 			}
@@ -909,7 +901,7 @@ void GameScene::LoadMoveFloorGimmickParam(const std::string& _filePath)
 				std::shared_ptr<MoveMagneFloor> floor = std::make_shared<MoveMagneFloor>();
 				floor->Init();
 				floor->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				floor->SetMoveMax(static_cast<int>(row[4]));
+				floor->SetMoveMax(static_cast<int>(row[static_cast<unsigned int>(MoveFloor::moveMax)]));
 				floor->SetMaguneState(MoveMagneFloor::MoveState::nomal);
 				floor->SetObjType(KdGameObject::ObjectType::MoveMagneFloorNomalVer);
 				m_objList.push_back(floor);
@@ -923,9 +915,9 @@ void GameScene::LoadMoveFloorGimmickParam(const std::string& _filePath)
 				std::shared_ptr<MoveMagneFloor> floor = std::make_shared<MoveMagneFloor>();
 				floor->Init();
 				floor->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				floor->SetMoveMax(static_cast<int>(row[4]));
-				floor->SetKeyObj(static_cast<int>(row[5]));
-				floor->SetMaguneForce(static_cast<int>(row[6]));
+				floor->SetMoveMax(static_cast<int>(row[static_cast<unsigned int>(MoveFloor::moveMax)]));
+				floor->SetKeyObj(static_cast<int>(row[static_cast<unsigned int>(MoveFloor::keyObjNum)]));
+				floor->SetMaguneForce(static_cast<int>(row[static_cast<unsigned int>(MoveFloor::force)]));
 				floor->SetMaguneState(MoveMagneFloor::MoveState::special);
 				floor->SetObjType(KdGameObject::ObjectType::MoveMagunet);
 				m_objList.push_back(floor);
@@ -955,10 +947,10 @@ void GameScene::LoadElectricityEffectObjectParam(const std::string& _filePath)
 				//=====================================
 				std::shared_ptr<ElectricCurrent> elec = std::make_shared<ElectricCurrent>();
 				elec->SetStartPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				elec->SetEndPos({ row[4],row[5],row[6] });
+				elec->SetEndPos({ row[static_cast<unsigned int>(Effect::endPosX)],row[static_cast<unsigned int>(Effect::endPosY)],row[static_cast<unsigned int>(Effect::endPosZ)] });
 				elec->Init();
 				elec->SetDestination(ElectricCurrent::Destination::End);
-				elec->SetTargetObject((ElectricCurrent::TargetObject)row[7]);
+				elec->SetTargetObject((ElectricCurrent::TargetObject)row[static_cast<unsigned int>(Effect::target)]);
 				m_objList.push_back(elec);
 				break;
 			}
@@ -969,11 +961,11 @@ void GameScene::LoadElectricityEffectObjectParam(const std::string& _filePath)
 				//=====================================
 				std::shared_ptr<ElectricCurrent> elec = std::make_shared<ElectricCurrent>();
 				elec->SetStartPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
-				elec->SetEndPos({ row[4],row[5],row[6] });
-				elec->SetStopoverPos({ row[7],row[8],row[9] });
+				elec->SetEndPos({ row[static_cast<unsigned int>(Effect::endPosX)],row[static_cast<unsigned int>(Effect::endPosY)],row[static_cast<unsigned int>(Effect::endPosZ)] });
+				elec->SetStopoverPos({ row[static_cast<unsigned int>(Effect::middleX)],row[static_cast<unsigned int>(Effect::middleY)],row[static_cast<unsigned int>(Effect::middleZ)] });
 				elec->Init();
 				elec->SetDestination(ElectricCurrent::Destination::StopOver);
-				elec->SetTargetObject((ElectricCurrent::TargetObject)row[10]);
+				elec->SetTargetObject((ElectricCurrent::TargetObject)row[static_cast<unsigned int>(Effect::endTarget)]);
 				m_objList.push_back(elec);
 				break;
 			}
@@ -1059,13 +1051,74 @@ void GameScene::OpenGateAnimation()
 	}
 
 	// ゲートマネージャーにアニメーション開始を伝える
-	if(m_nowCamTarget == KdGameObject::ObjectType::Gate)
+	switch (m_nowCamTarget)
 	{
+	case KdGameObject::ObjectType::Gate:
 		GateManager::Instance().SetState(GateManager::State::OpenAnimation);
-	}
-	else if (m_nowCamTarget == KdGameObject::ObjectType::Player)
-	{
+		break;
+	case KdGameObject::ObjectType::Player:
 		GateManager::Instance().SetState(GateManager::State::BackPlayerAnimation);
+		break;
+	default:
+		break;
+	}
+}
+
+void GameScene::ChangeNextScene()
+{
+	// プレイヤーの実態がなければ処理をしない
+	std::shared_ptr<Player> spPlayer = m_player.lock();
+	if (!spPlayer)return;
+
+	// ゴール状態でもゲームオーバー状態でもなければ処理をしない
+	if (!GoalManager::instance().GetClearState() && !spPlayer->GetGameOver())return;
+
+	//プレイヤーがゴールした時リザルト画面へ移行する
+	if (GoalManager::instance().GetClearState() == true)
+	{
+		if (GetAsyncKeyState(VK_RETURN) & 0x8000)
+		{
+			if (!m_pushEnterFlg)
+			{
+				if (m_hp.expired() == false)
+				{
+					ScoreManager::instance().RegisterClearHp(m_hp.lock()->GetHpNum());
+					ScoreManager::instance().ConversionScore();
+				}
+
+				SceneManager::Instance().SetNextScene
+				(
+					SceneManager::SceneType::Result
+				);
+				StartManager::instance().SetStartState(false);
+				m_pushEnterFlg = true;
+			}
+		}
+		else
+		{
+			m_pushEnterFlg = false;
+		}
+	}
+	// HPが０になった場合
+	else if (m_player.lock()->GetGameOver() == true)
+	{
+		// タイトル画面に戻る処理
+		if (GetAsyncKeyState(VK_RETURN) & 0x8000)
+		{
+			if (!m_pushEnterFlg)
+			{
+				SceneManager::Instance().SetNextScene
+				(
+					SceneManager::SceneType::Title
+				);
+				StartManager::instance().SetStartState(false);
+				m_pushEnterFlg = true;
+			}
+		}
+		else
+		{
+			m_pushEnterFlg = false;
+		}
 	}
 }
 
@@ -1089,16 +1142,23 @@ std::shared_ptr<KdGameObject> GameScene::FindObject(const KdGameObject::ObjectTy
 KdGameObject::ObjectType GameScene::FindNextTarget(const std::weak_ptr<KdGameObject>& _nowTarget)
 {
 	std::shared_ptr<KdGameObject> spNowTarget = _nowTarget.lock();
-	if (spNowTarget)
+
+	// ターゲットの実態がないなら早期リターン
+	if (!spNowTarget)
 	{
-		if (spNowTarget->GetObjType() == KdGameObject::ObjectType::Player)
-		{
-			return KdGameObject::ObjectType::Gate;
-		}
-		else if (spNowTarget->GetObjType() == KdGameObject::ObjectType::Gate)
-		{
-			return KdGameObject::ObjectType::Player;
-		}
+		return KdGameObject::ObjectType::None;
+	}
+
+	switch (spNowTarget->GetObjType())
+	{
+	case KdGameObject::ObjectType::Player:
+		return KdGameObject::ObjectType::Gate;
+		break;
+	case KdGameObject::ObjectType::Gate:
+		return KdGameObject::ObjectType::Player;
+		break;
+	default:
+		break;
 	}
 
 	//見つからなかった場合

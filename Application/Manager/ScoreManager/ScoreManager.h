@@ -20,8 +20,6 @@ private:
 	ScoreManager(){}
 	~ScoreManager(){}
 
-	std::mutex m_mutex; // データの一貫性を保つ
-
 	enum class RANK
 	{
 		S,
