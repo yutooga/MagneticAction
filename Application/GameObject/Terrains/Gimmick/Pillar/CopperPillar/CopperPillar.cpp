@@ -1,9 +1,8 @@
 ﻿#include "CopperPillar.h"
-#include"../../../../Manager/ModelManager/ModelManager.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
 
 void CopperPillar::Init()
 {
-
 	// モデルの読み込み
 	if (!m_model)
 	{
@@ -16,9 +15,6 @@ void CopperPillar::Init()
 
 	// IMGUI用の初期化
 	m_randomId = rand();
-
-	// 座標の初期化
-	m_pos = { 0,20,10 };
 }
 
 void CopperPillar::Update()

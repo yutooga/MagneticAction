@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include"../../TerrainsBase.h"
+#include"../../../TerrainsBase.h"
 
-class GoldPillar :public TerrainsBase
+class CopperPillar :public TerrainsBase
 {
 public:
 
@@ -11,12 +11,12 @@ public:
 
 	void DrawImGui()override;
 
-	void DrawBright()override{}
+	void DrawBright()override {}
 
 	void SetModelSize(const float _size) { m_modelSize = _size; }
 
 private:
 
 	// モデルの表示サイズ
-	float m_modelSize = 1.0f;
-}; 
+	float m_modelSize = 0.0f;
+};

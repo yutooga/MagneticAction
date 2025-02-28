@@ -1,9 +1,8 @@
 ﻿#include "GoldPillar.h"
-#include"../../../../Manager/ModelManager/ModelManager.h"
+#include"../../../../../Manager/ModelManager/ModelManager.h"
 
 void GoldPillar::Init()
 {
-
 	// モデルの読み込み
 	if (!m_model)
 	{
@@ -16,8 +15,6 @@ void GoldPillar::Init()
 
 	// IMGUI用の初期化
 	m_randomId = rand();
-
-	m_pos = { 0,20,10 };
 }
 
 void GoldPillar::Update()
@@ -30,12 +27,12 @@ void GoldPillar::Update()
 void GoldPillar::DrawImGui()
 {
 	ImGui::PushID(m_randomId);
-	if (ImGui::CollapsingHeader("CopperPillar", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader("GoldPillar", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::DragFloat("CopperPillar m_posX", &m_pos.x, 0.1f);
-		ImGui::DragFloat("CopperPillar m_posY", &m_pos.y, 0.1f);
-		ImGui::DragFloat("CopperPillar m_posZ", &m_pos.z, 0.1f);
-		ImGui::DragFloat("CopperPillar m_size", &m_modelSize, 0.1f);
+		ImGui::DragFloat("m_posX", &m_pos.x, 0.1f);
+		ImGui::DragFloat("m_posY", &m_pos.y, 0.1f);
+		ImGui::DragFloat("m_posZ", &m_pos.z, 0.1f);
+		ImGui::DragFloat("m_size", &m_modelSize, 0.1f);
 	}
 	ImGui::PopID();
 }
