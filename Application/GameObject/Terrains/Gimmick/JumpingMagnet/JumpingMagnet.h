@@ -6,7 +6,7 @@ class JumpingMagnet : public MagneFloorBase
 {
 public:
 	JumpingMagnet() {}
-	~JumpingMagnet() {}
+	~JumpingMagnet()override{}
 
 	void Init()override;
 
@@ -20,7 +20,6 @@ public:
 
 	static const float k_sinCurveAngle;	// サインカーブの角度
 	static const float k_addAngle;	// 角度の加算量
-	static const float k_colisionRadius;	// 当たり判定の大きさ
 	static const float k_colisionCircleNum;	// 当たり判定の球の個数
 
 	enum class ColisionAdjustValue
@@ -52,13 +51,13 @@ private:
 	void MagneScope()override;
 
 	// モデルのサイズ
-	float m_modelSize = 8.4f;
+	float m_modelSize = 0.f;
 
 	// 加算値
 	float m_addAmount = 0;
 
 	// 斥力の処理の補正値
-	float m_adjustAdValue = 25.0f;
+	float m_adjustAdValue = 0.0f;
 
 	// 加算判断フラグ
 	bool m_addFlg = false;

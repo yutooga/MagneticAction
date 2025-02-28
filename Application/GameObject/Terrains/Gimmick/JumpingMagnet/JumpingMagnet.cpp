@@ -4,7 +4,6 @@
 
 const float JumpingMagnet::k_sinCurveAngle = 3.0f;
 const float JumpingMagnet::k_addAngle = 0.1f;
-const float JumpingMagnet::k_colisionRadius = 25.f;
 const float JumpingMagnet::k_colisionCircleNum = 3.f;
 
 void JumpingMagnet::Init()
@@ -17,13 +16,19 @@ void JumpingMagnet::Init()
 
 	// 当たり判定の形状登録
 	m_pCollider = std::make_unique<KdCollider>();
-	m_pCollider->RegisterCollisionShape("JumpingMagunet", m_model, KdCollider::TypeGround | KdCollider::TypeDamage);
+	m_pCollider->RegisterCollisionShape("JumpingMagnet", m_model, KdCollider::TypeGround | KdCollider::TypeDamage);
 
 	// ImGui用のランダムなIdの生成
 	m_randomId = rand();
 
 	// まとう磁力の初期化
 	m_maguneForce = NoForce;
+
+	// モデルの大きさの初期化
+	m_modelSize = m_gimmickData["JumpingMagnet"].value("ModelSize", 8.4f);
+
+	// 補正値の初期化
+	m_adjustAdValue = m_gimmickData["JumpingMagnet"].value("AdjustValue", 25.f);
 
 	// 更新フラグの初期化
 	m_updateFlg = false;
@@ -70,7 +75,7 @@ void JumpingMagnet::JudgmentPlayer()
 	{
 		KdCollider::SphereInfo sphere;
 		sphere.m_sphere.Center = m_pos;
-		sphere.m_sphere.Radius = k_colisionRadius;
+		sphere.m_sphere.Radius = m_gimmickData["JumpingMagnet"]["Colision"].value("Radius", 25.f);
 		sphere.m_type = KdCollider::TypeSight;
 		spheres.push_back(sphere);
 	}
@@ -136,7 +141,7 @@ void JumpingMagnet::PlayerReaction()
 	//オブジェクトが存在しないまたは磁力をまとっていないなら早期リターン
 	if (m_nowState == State::NormalState || m_obj.expired() == true)return;
 
-	// 吸着状態出ない場合早期リターン
+	// 吸着状態でない場合早期リターン
 	if (m_nowState != State::Adsorption)return;
 
 	Math::Vector3 moveDir = Math::Vector3::Zero;	// 動く方向
@@ -214,11 +219,9 @@ void JumpingMagnet::MagneScope()
 	//球の中心位置を設定
 	sphere.m_sphere.Center = m_pos;
 	//球の半径を設定
-	sphere.m_sphere.Radius = 41.0f;
+	sphere.m_sphere.Radius = m_gimmickData["JumpingMagnet"]["Scope"].value("Radius", 41.f);
 	//当たり判定をしたいタイプを設定
 	sphere.m_type = KdCollider::TypeSight;
-	//デバック用
-	//m_pDebugWire->AddDebugSphere(sphere.m_sphere.Center, sphere.m_sphere.Radius);
 
 	//当たり判定
 	for (auto& obj : SceneManager::Instance().GetObjList())

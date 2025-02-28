@@ -6,7 +6,7 @@ class MagicRing : public TerrainsBase
 public:
 
 	MagicRing(){}
-	~MagicRing(){}
+	~MagicRing()override{}
 
 	void Init()override;
 
@@ -39,8 +39,11 @@ public:
 
 private:
 
+	// 表示色の更新
+	void BrightColorUpdate();
+
 	//モデルのサイズ
-	const float m_modelSize = 5.0f;
+	float m_modelSize = 0.0f;
 
 	//オブジェクトの種類
 	ObjectType m_objType = ObjectType::None;
@@ -52,5 +55,8 @@ private:
 	int m_effectReappearanceCnt = 0;
 
 	// 色の透明度
-	float m_colorAlpha = 1.0f;
+	float m_colorAlpha = 0.0f;
+
+	// 表示色
+	Math::Color m_color;
 };

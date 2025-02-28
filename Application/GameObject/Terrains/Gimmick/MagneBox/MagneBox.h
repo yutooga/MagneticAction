@@ -15,23 +15,30 @@ public:
 
 	void DrawImGui()override;
 
-	ObjectType GetObjType() { return ObjectType::MagneBox; }
+	ObjectType GetObjType()override{ return ObjectType::MagneBox; }
 
 	static const float k_changeMoment;	// 磁力の切り替わるタイミング
 
-	static const int k_coolTime = 500;	// クールタイムの長さ
-
 private:
 
+	// 纏っている磁極を切り替える処理
+	void ChangeForce();
+
+	// 表示色の更新
+	void BrightColorUpdate();
+
 	// モデルのサイズ
-	float m_modelSize = 13.4f;
+	float m_modelSize = 0.f;
 
 	// 回転角度
-	float m_angle = 180.0f;
+	float m_angle = 0.0f;
 
 	// 磁力の切り替えカウント
 	float m_changeCnt = 0.f;
 
 	// クールタイムのカウント
 	int m_coolTimeCnt = 0;
+
+	// 表示色
+	Math::Color m_color;
 };

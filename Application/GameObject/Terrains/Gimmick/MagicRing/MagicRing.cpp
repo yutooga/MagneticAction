@@ -8,11 +8,13 @@ const float MagicRing::k_addAmount = 0.001f;
 
 void MagicRing::Init()
 {
+	// モデルの読み込み
 	if (!m_model)
 	{
 		m_model = ModelManager::Instance().GetModel("MagicRing");
 	}
 
+	// 当たり判定の形状登録
 	m_pCollider = std::make_unique<KdCollider>();
 	m_pCollider->RegisterCollisionShape("MagicRing", m_model, KdCollider::TypeGround | KdCollider::TypeDamage);
 
@@ -20,17 +22,85 @@ void MagicRing::Init()
 	//中が空のときは再生しない
 	if(m_effectName.size()!=0)
 	{
-		KdEffekseerManager::GetInstance().Play(m_effectName, m_pos, 5.0f, 1.0f, true);
+		KdEffekseerManager::GetInstance().Play(m_effectName, m_pos, 
+			m_gimmickData["MagicRing"]["Effect"].value("Size", 5.f), m_gimmickData["MagicRing"]["Effect"].value("Speed", 1.f), true);
 	}
+
+	// モデルの大きさの初期化
+	m_modelSize = m_gimmickData["MagicRing"].value("ModelSize", 5.f);
+
+	// 色の透明度の初期化
+	m_colorAlpha = m_gimmickData["MagicRing"].value("Alpha", 1.f);
+
+	// 表示色の初期化
+	m_color = { 0,0,0 };
 
 	//ImGui用のランダムなIdの生成
 	m_randomId = rand();
 
+	// 纏っている磁力の初期化
 	m_maguneForce = NoForce;
 }
 
 void MagicRing::Update()
 {
+	// 魔法陣の纏っている磁力と表示色の更新
+	BrightColorUpdate();
+
+	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
+	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_modelSize);
+	m_mWorld = scaleMat * transMat;
+}
+
+void MagicRing::SetObjType(ObjectType _type)
+{
+	// オブジェクトタイプの保存
+	m_objType = _type;
+
+	// 磁力の付与
+	switch (_type)
+	{
+	case KdGameObject::ObjectType::MagicRingS:
+		m_color = { 0,0,m_colorAlpha };	// N極の場合青色に光らせる
+		m_maguneForce = MagunePowerN;
+		break;
+	case KdGameObject::ObjectType::MagicRingN:
+		m_color = { m_colorAlpha,0,0 };	// S極の場合赤色に光らせる
+		m_maguneForce = MagunePowerS;
+		break;
+	case KdGameObject::ObjectType::NoForceRing:
+		m_maguneForce = NoForce;
+		break;
+	default:
+		break;
+	}
+}
+
+void MagicRing::DrawBright()
+{
+	//磁力をまとっていないなら描画しない
+	if ((m_maguneForce & NoForce) != 0)return;
+
+	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, m_color);
+}
+
+void MagicRing::DrawImGui()
+{
+	ImGui::PushID(m_randomId);
+	if(ImGui::CollapsingHeader("MagicRing",ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::DragFloat3("MagicRing m_pos", &m_pos.x, 0.1f);
+	}
+	ImGui::PopID();
+}
+
+void MagicRing::BrightColorUpdate()
+{
+
+	// 魔法陣が磁力をまとっていないとき早期リターン
+	if ((m_maguneForce & NoForce) != 0)return;
+
+	// プレイヤーが魔法陣から磁力を吸い取ったら魔法陣の磁力をなくす
 	if (m_updateFlg)
 	{
 		m_colorAlpha -= k_subtractionAmount;
@@ -44,6 +114,7 @@ void MagicRing::Update()
 		}
 	}
 
+	// 魔法陣が再び磁力をまとう処理
 	if (m_effectReappearanceCnt > 0 && m_effectReappearanceCnt > k_changeColorTime)
 	{
 		m_effectReappearanceCnt--;
@@ -67,54 +138,16 @@ void MagicRing::Update()
 		}
 	}
 
-	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
-	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_modelSize);
-	m_mWorld = scaleMat * transMat;
-}
-
-void MagicRing::SetObjType(ObjectType _type)
-{
-	m_objType = _type;
-	if (_type == ObjectType::MagicRingS)
+	// 表示色の更新
+	switch (m_maguneForce)
 	{
-		m_maguneForce = MagunePowerN;
+	case KdGameObject::MagunePowerN:
+		m_color = { m_colorAlpha,0,0 };	// S極の場合赤色に光らせる
+		break;
+	case KdGameObject::MagunePowerS:
+		m_color = { 0,0,m_colorAlpha };	// N極の場合青色に光らせる
+		break;
+	default:
+		break;
 	}
-	else if (_type == ObjectType::MagicRingN)
-	{
-		m_maguneForce = MagunePowerS;
-	}
-	else if (_type == ObjectType::NoForceRing)
-	{
-		m_maguneForce = NoForce;
-	}
-}
-
-void MagicRing::DrawBright()
-{
-	//磁力をまとっていないなら描画しない
-	if ((m_maguneForce & NoForce) != 0)return;
-
-	Math::Color color;
-	if ((m_maguneForce & MagunePowerN) != 0)
-	{
-		//S極の場合赤色に光らせる
-		color = { m_colorAlpha,0,0 };
-	}
-	else if ((m_maguneForce & MagunePowerS) != 0)
-	{
-		//N極の場合青色に光らせる
-		color = { 0,0,m_colorAlpha };
-	}
-
-	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, color);
-}
-
-void MagicRing::DrawImGui()
-{
-	ImGui::PushID(m_randomId);
-	if(ImGui::CollapsingHeader("MagicRing",ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		ImGui::DragFloat3("MagicRing m_pos", &m_pos.x, 0.1f);
-	}
-	ImGui::PopID();
 }
