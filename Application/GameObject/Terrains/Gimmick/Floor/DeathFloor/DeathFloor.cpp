@@ -14,12 +14,6 @@ const float DeathFloor::k_unitVector = 1.f;
 
 void DeathFloor::Init()
 {
-	// モデルの読み込み
-	if (!m_model)
-	{
-		m_model = ModelManager::Instance().GetModel("DeathFloor");
-	}
-
 	// モデルの大きさの初期化
 	m_modelSize = m_gimmickData["DeathFloor"].value("ModelSize", 8.f);
 
@@ -43,10 +37,6 @@ void DeathFloor::Init()
 
 	// 最初の座標を保存
 	m_firstPos = m_pos;
-
-	// 当たり判定の形状登録
-	m_pCollider = std::make_unique<KdCollider>();
-	m_pCollider->RegisterCollisionShape("DeathFloor", m_model, KdCollider::TypeGround | KdCollider::TypeDamage);
 }
 
 void DeathFloor::Update()
@@ -76,10 +66,9 @@ void DeathFloor::DrawImGui()
 	ImGui::PushID(m_randomId);
 	if (ImGui::CollapsingHeader("DeathFloor", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::DragFloat("DeathFloor m_posX", &m_pos.x, 0.1f);
-		ImGui::DragFloat("DeathFloor m_posY", &m_pos.y, 0.1f);
-		ImGui::DragFloat("DeathFloor m_posZ", &m_pos.z, 0.1f);
+		ImGui::DragFloat3("DeathFloor m_pos", &m_pos.x, 0.1f);
 		ImGui::DragFloat("length", &m_length, 0.1f);
+		ImGui::DragFloat("Size", &m_modelSize, 0.01f);
 	}
 	ImGui::PopID();
 }
@@ -336,6 +325,19 @@ void DeathFloor::SetMoveState(std::shared_ptr<MoveStateBase> State)
 	m_moveState->Enter(*this);
 }
 
+void DeathFloor::NormalMove::Enter(DeathFloor& owner)
+{
+	// モデルの読み込み
+	if (!owner.m_model)
+	{
+		owner.m_model = ModelManager::Instance().GetModel("DeathFloor");
+	}
+
+	// 当たり判定の形状登録
+	owner.m_pCollider = std::make_unique<KdCollider>();
+	owner.m_pCollider->RegisterCollisionShape("DeathFloor", owner.m_model, KdCollider::TypeGround | KdCollider::TypeDamage);
+}
+
 void DeathFloor::NormalMove::Update(DeathFloor& owner)
 {
 	// フラグの初期化
@@ -385,6 +387,16 @@ void DeathFloor::ChangeMove::Enter(DeathFloor& owner)
 {
 	// オブジェクトのX座標を保管する
 	owner.m_firstPosX = owner.m_pos.x;
+
+	// モデルの読み込み
+	if (!owner.m_model)
+	{
+		owner.m_model = ModelManager::Instance().GetModel("BigDeathFloor");
+	}
+
+	// 当たり判定の形状登録
+	owner.m_pCollider = std::make_unique<KdCollider>();
+	owner.m_pCollider->RegisterCollisionShape("DeathFloor", owner.m_model, KdCollider::TypeGround | KdCollider::TypeDamage);
 }
 
 void DeathFloor::ChangeMove::Update(DeathFloor& owner)

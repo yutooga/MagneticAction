@@ -116,7 +116,7 @@ private:
 
 	class NormalMove : public MoveStateBase
 	{
-		void Enter([[maybe_unused]] DeathFloor& owner){}
+		void Enter(DeathFloor& owner);
 		void Update(DeathFloor& owner);
 		void PostUpdate([[maybe_unused]] DeathFloor& owner);
 		void Exit([[maybe_unused]] DeathFloor& owner) {}

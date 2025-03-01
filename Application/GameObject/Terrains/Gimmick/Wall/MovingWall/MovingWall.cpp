@@ -67,7 +67,7 @@ void MovingWall::DrawImGui()
 	{
 		ImGui::DragFloat3("MovingWall m_pos", &m_pos.x, 0.1f);
 		ImGui::DragFloat("MovingWall m_size", &m_modelSize, 0.1f);
-		ImGui::DragFloat("MovingWall m_angle", &m_angle, 0.1f);
+		ImGui::DragFloat("MovingWall m_angle", &m_angle, 0.01f);
 		ImGui::LabelText("length", "length %f", (m_pos - m_previosPos).Length());
 	}
 	ImGui::PopID();

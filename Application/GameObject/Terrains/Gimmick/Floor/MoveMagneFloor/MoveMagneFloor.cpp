@@ -5,7 +5,7 @@
 
 const float MoveMagneFloor::k_specialMoveSpeed = 2.f;
 const float MoveMagneFloor::k_normalMoveSpeed = 350.f;
-const float MoveMagneFloor::k_addRotAngleAmount = 0.5f;
+const float MoveMagneFloor::k_addRotAngleAmount = 0.2f;
 const float MoveMagneFloor::k_initialOppoPowerValue = 0.1f;
 const float MoveMagneFloor::k_correctionValueY = 3.0f;
 const float MoveMagneFloor::k_oppositionLimit = 30.f;

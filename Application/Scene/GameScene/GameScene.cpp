@@ -482,7 +482,7 @@ void GameScene::LoadGimmickDefaultParam(const std::string& _filePath)
 				//=====================================
 				CreateDeathFloor({ row[static_cast<unsigned int>(GimmickData::posX)],
 					row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] },
-					DeathFloor::MoveState::change, KdGameObject::ObjectType::MovingDeathFloor);
+					DeathFloor::MoveState::change, KdGameObject::ObjectType::MovingDeathFloor,29.f);
 				break;
 			}
 			case 20:
