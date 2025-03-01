@@ -182,6 +182,9 @@ void MovingWall::PlayerReaction()
 	{
 		//吸着処理
 
+		// SEの再生
+		CheckSe();
+
 		Math::Vector3 PlayerPos = m_obj.lock()->GetPos();
 
 		m_adPow = k_adsorptionPower;

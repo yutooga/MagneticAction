@@ -41,6 +41,9 @@ void ChangeFloor::Update()
 	// 纏っている磁力の切り替え
 	ChangeForce();
 
+	// SEが再生中かどうか判断する処理
+	SeCheck();
+
 	// 行列の確定
 	Math::Matrix scaleMat = Math::Matrix::CreateScale(k_modelScale);
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
@@ -73,12 +76,16 @@ void ChangeFloor::PlayerReaction()
 	// 吸着状態の時
 	if (m_nowState == State::Adsorption)
 	{
+		// SEの再生
+		CheckSe();
+
 		//吸着処理
 		m_adPow = k_adsorptionPower;
 		moveDir = m_pos - m_obj.lock()->GetPos();
+		Math::Vector3 playerPos = m_obj.lock()->GetPos();
 
 		// プレイヤーがオブジェクトの上下にいる場合XZ軸の引き寄せる力を０にする
-		if (m_pos.y > m_obj.lock()->GetPos().y || m_pos.y < m_obj.lock()->GetPos().y)
+		if (m_pos.y > playerPos.y || m_pos.y < playerPos.y)
 		{
 			moveDir.x = 0;
 			moveDir.z = 0;
@@ -87,15 +94,15 @@ void ChangeFloor::PlayerReaction()
 		{
 			moveDir.y = 0;
 			// プレイヤーがオブジェクトの左右にいるならZ方向の引き寄せる力を０にする
-			if (m_obj.lock()->GetPos().z < (m_pos.z + m_adjustAdValue) && m_obj.lock()->GetPos().z >(m_pos.z - m_adjustAdValue))
+			if (playerPos.z < (m_pos.z + m_adjustAdValue) && playerPos.z >(m_pos.z - m_adjustAdValue))
 			{
-				if (m_pos.x > m_obj.lock()->GetPos().x || m_pos.x < m_obj.lock()->GetPos().x)
+				if (m_pos.x > playerPos.x || m_pos.x < playerPos.x)
 				{
 					moveDir.z = 0;
 				}
 			}
 			// プレイヤーがオブジェクトの前後にいるならX方向の引き寄せる力を０にする
-			else if (m_pos.z > m_obj.lock()->GetPos().z || m_pos.z < m_obj.lock()->GetPos().z) { moveDir.x = 0; }
+			else if (m_pos.z > playerPos.z || m_pos.z < playerPos.z) { moveDir.x = 0; }
 		}
 
 		// 引き寄せる力の大きさの値より距離の値が小さくなったら引き寄せる力の値を距離の値にする
@@ -197,6 +204,13 @@ void ChangeFloor::JugmentPlayer()
 				// 上まで持ち上げられた
 				m_addAmount += DirectX::XMConvertToRadians(k_floatingAmplitude);
 				playerPos.y += sin(m_addAmount) * k_floatingSpeed;
+
+				// SE再生
+				if (!m_seFlg)
+				{
+					m_wpSe = KdAudioManager::Instance().Play(m_gimmickData["Se"]["Floating"]["URL"], false);
+					m_seFlg = true;
+				}
 			}
 			obj->SettingPos(playerPos);
 
@@ -251,5 +265,19 @@ void ChangeFloor::ChangeForce()
 		}
 		m_changeInterval = m_intervalMax;
 		m_coolTime = k_coolTimeLength;
+	}
+}
+
+void ChangeFloor::SeCheck()
+{
+	std::shared_ptr<KdSoundInstance> _spSe = m_wpSe.lock();
+
+	// SEの実態がないなら処理しない
+	if (!_spSe)return;
+
+	// SEの再生が終わったらならSE再生フラグをOFFにするs
+	if (!_spSe->IsPlaying())
+	{
+		m_seFlg = false;
 	}
 }

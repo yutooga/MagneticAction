@@ -50,6 +50,9 @@ private:
 	// 影響を与える範囲内にいるかどうか判断する関数
 	void MagneScope()override;
 
+	// SEが再生されているかチェックする関数
+	void SeCheck();
+
 	// モデルのサイズ
 	float m_modelSize = 0.f;
 
@@ -61,4 +64,10 @@ private:
 
 	// 加算判断フラグ
 	bool m_addFlg = false;
+
+	// SEの実態
+	std::weak_ptr<KdSoundInstance> m_wpSe;
+
+	// SE再生フラグ
+	bool m_seFlg = false;
 };

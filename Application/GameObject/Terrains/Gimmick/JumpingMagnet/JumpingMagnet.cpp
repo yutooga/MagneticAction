@@ -39,6 +39,9 @@ void JumpingMagnet::Init()
 
 void JumpingMagnet::Update()
 {
+	// SE再生チェック処理
+	SeCheck();
+
 	// 行列の確定
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
 	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_modelSize);
@@ -149,6 +152,10 @@ void JumpingMagnet::PlayerReaction()
 	Math::Vector3 playerPos = m_obj.lock()->GetPos();	// playerの座標
 
 	//吸着処理
+
+	// SEの再生
+	CheckSe();
+
 	m_adPow = k_adsorptionPower;
 	moveDir = m_pos - playerPos;
 
@@ -200,6 +207,11 @@ void JumpingMagnet::FloatingPlayer(const std::weak_ptr<KdGameObject>& _obj)
 		// 上まで持ち上げられた
 		m_addAmount += DirectX::XMConvertToRadians(k_sinCurveAngle);
 		playerPos.y += sin(m_addAmount) * k_addAngle;
+		if(!m_seFlg)
+		{
+			m_wpSe = KdAudioManager::Instance().Play(m_gimmickData["Se"]["Floating"]["URL"], false);
+			m_seFlg = true;
+		}
 	}
 
 	_obj.lock()->SettingPos(playerPos);
@@ -247,5 +259,19 @@ void JumpingMagnet::MagneScope()
 			}
 			break;
 		}
+	}
+}
+
+void JumpingMagnet::SeCheck()
+{
+	std::shared_ptr<KdSoundInstance> _spSe = m_wpSe.lock();
+
+	// SEの実態がないなら処理しない
+	if (!_spSe)return;
+
+	// SEの再生が終わったらならSE再生フラグをOFFにする
+	if (!_spSe->IsPlaying())
+	{
+		m_seFlg = false;
 	}
 }

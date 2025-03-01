@@ -57,6 +57,9 @@ private:
 	// 纏っている時局を切り替える関数
 	void ChangeForce();
 
+	// SEが再生されているかチェックする関数
+	void SeCheck();
+
 	// クールタイムの最大
 	float m_intervalMax = 0.0f;
 
@@ -83,4 +86,10 @@ private:
 
 	// 表示色
 	Math::Color m_color;
+
+	// SEの実態
+	std::weak_ptr<KdSoundInstance> m_wpSe;
+
+	// SE再生フラグ
+	bool m_seFlg = false;
 };

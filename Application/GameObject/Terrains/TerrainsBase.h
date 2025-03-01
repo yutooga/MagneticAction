@@ -21,6 +21,9 @@ public:
 
 protected:
 
+	// 特定のSE再生判断処理
+	void CheckSe();
+
 	void SetData(nlohmann::json _data) {m_gimmickData = _data;}
 
 	std::shared_ptr<KdModelWork> m_model;
@@ -30,6 +33,9 @@ protected:
 
 	//imgui用のランダムなID
 	int m_randomId;
+
+	// SEの実態
+	std::weak_ptr<KdSoundInstance> m_wpAttractSe;
 
 	static nlohmann::json m_gimmickData;
 };

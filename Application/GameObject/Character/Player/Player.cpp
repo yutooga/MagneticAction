@@ -463,6 +463,22 @@ void Player::Player_TerrainSphereColision()
 	
 }
 
+void Player::PlayFloatingSe()
+{
+	// SE再生
+	if (m_wpSe.expired() == true)	//　まだ読み込まれていないなら読み込む
+	{
+		m_wpSe = KdAudioManager::Instance().Play(m_jsonData["Se"]["Floating"]["URL"], false);
+	}
+	else if (m_wpSe.expired() == false)	// すでに読み込まれているなら再生が終わっているなら再び再生する
+	{
+		if (!m_wpSe.lock()->IsPlaying())
+		{
+			m_wpSe = KdAudioManager::Instance().Play(m_jsonData["Se"]["Floating"]["URL"], false);
+		}
+	}
+}
+
 void Player::OnTheArea()
 {
 	// 磁力ゾーンに入っていないまたは、磁力を帯びていないなら早期リターン
@@ -538,6 +554,9 @@ void Player::OnTheArea()
 			float speed = m_jsonData["ColisionDataForMagneArea"]["FloatingSpeed"];
 			m_addAmount += DirectX::XMConvertToRadians(power);
 			m_pos.y += sin(m_addAmount) * speed;
+
+			// SE再生処理
+			PlayFloatingSe();
 		}
 	}
 	else
@@ -775,7 +794,12 @@ void Player::OnHit(ObjectType _objType, const std::weak_ptr<KdGameObject>& _obj)
 	//磁力のオーラを消す魔法陣
 	case KdGameObject::ObjectType::NoForceRing:
 	{
-		m_maguneForce = NoForce;
+		if ((m_maguneForce & NoForce) == 0)
+		{
+			//SE再生
+			KdAudioManager::Instance().Play(m_jsonData["Se"]["NoForceRing"]["URL"]);
+			m_maguneForce = NoForce;
+		}
 		break;
 	}
 	// 磁力の切り替わる床

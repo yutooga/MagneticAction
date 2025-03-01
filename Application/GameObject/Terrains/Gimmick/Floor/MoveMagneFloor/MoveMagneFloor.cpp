@@ -151,6 +151,8 @@ void MoveMagneFloor::PlayerReaction()
 	// 吸着状態のとき
 	else if (m_nowState == State::Adsorption)
 	{
+		// SEの再生
+		CheckSe();
 
 		//吸着処理
 		m_adPow = k_adsorptionPower;

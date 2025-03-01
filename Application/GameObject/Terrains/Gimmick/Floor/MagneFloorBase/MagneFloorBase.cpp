@@ -88,6 +88,10 @@ void MagneFloorBase::PlayerReaction()
 		}
 		break;
 	case MagneFloorBase::State::Adsorption:	//吸着処理
+
+		// SEの再生
+		CheckSe();
+
 		m_adPow = k_adsorptionPower;
 		moveDir = m_pos - m_obj.lock()->GetPos();	// プレイヤーをオブジェクトの方向に引っ張る
 		if (moveDir.Length() < k_adsorptionPower)m_adPow = moveDir.Length();

@@ -38,6 +38,7 @@
 #include"../../GameObject/Terrains/Gimmick/Lift/JointLift/JointLift.h"
 #include"../../GameObject/Terrains/Gimmick/Lift/TargetLift/TargetLift.h"
 #include"../../GameObject/Terrains/Gimmick/Wall/ObstructiveWall/ObstructiveWall.h"
+#include"../../GameObject/Terrains/Gimmick/Line/Line.h"
 #include"../../GameObject/Terrains/Gimmick/Wall/StoneWall/StoneWall.h"
 #include"../../GameObject/Terrains/Gimmick/MagneBox/MagneBox.h"
 #include"../../GameObject/Terrains/Gimmick/MagneticArea/MagneticArea.h"
@@ -167,7 +168,7 @@ void GameScene::Init()
 
 	// BGM SEの初期化
 	KdAudioManager::Instance().StopAllSound();
-	KdAudioManager::Instance().Play(m_jsonData["Bgm"]["URL"], true);
+	//KdAudioManager::Instance().Play(m_jsonData["Bgm"]["URL"], true);
 
 
 	ModelManager::Instance().LoadModelFromCSVAsync(m_jsonData["ModelData"]["URL"]);
@@ -475,6 +476,17 @@ void GameScene::LoadGimmickDefaultParam(const std::string& _filePath)
 					DeathFloor::MoveState::nomal, KdGameObject::ObjectType::DeathFloor);
 				break;
 			}
+			case 16:
+			{
+				//=====================================
+				// 線路初期化
+				//=====================================
+				std::shared_ptr<Line> line = std::make_shared<Line>();
+				line->Init();
+				line->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
+				m_objList.push_back(line);
+				break;
+			}
 			case 19:
 			{
 				//=====================================
@@ -664,6 +676,18 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 		{
 			switch (static_cast<int>(row[static_cast<int>(GimmickData::type)]))
 			{
+			case 7:
+			{
+				//=====================================
+				// 返し初期化
+				//=====================================
+				std::shared_ptr<Barb> barb = std::make_shared<Barb>();
+				barb->Init();
+				barb->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
+				barb->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
+				m_objList.push_back(barb);
+				break;
+			}
 			case 8:
 			{
 				//=====================================

@@ -15,6 +15,8 @@ public:
 
 	void DrawBright()override {}
 
+	void SetModelSize(const float _size) { m_modelSize = _size; }
+
 private:
 
 	// モデルのサイズ

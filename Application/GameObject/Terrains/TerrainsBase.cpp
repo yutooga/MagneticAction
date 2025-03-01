@@ -44,3 +44,18 @@ void TerrainsBase::DrawBright()
 	}
 	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld, color);
 }
+
+void TerrainsBase::CheckSe()
+{
+	if (m_wpAttractSe.expired() == true)	//　まだ読み込まれていないなら読み込む
+	{
+		m_wpAttractSe = KdAudioManager::Instance().Play(m_gimmickData["Se"]["Attract"]["URL"], false);
+	}
+	else if (m_wpAttractSe.expired() == false)	// すでに読み込まれているなら再生が終わっているなら再び再生する
+	{
+		if (!m_wpAttractSe.lock()->IsPlaying())
+		{
+			m_wpAttractSe = KdAudioManager::Instance().Play(m_gimmickData["Se"]["Attract"]["URL"], false);
+		}
+	}
+}

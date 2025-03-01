@@ -89,6 +89,9 @@ private:
 	//プレイヤーと地面の処理
 	void Player_TerrainSphereColision();
 
+	// SE再生関数
+	void PlayFloatingSe();
+
 	// 磁力エリアにいるかどうか判断する関数
 	void OnTheArea();
 
@@ -159,6 +162,9 @@ private:
 	//SE関係
 	int m_seInterval = 0;
 	bool m_seFlg = false;
+
+	// SEの実態
+	std::weak_ptr<KdSoundInstance> m_wpSe;
 
 	// クリアしたかどうか判断するフラグ
 	bool m_clearFlg = false;

@@ -151,6 +151,9 @@ void MaguneticFloor::PlayerReaction()
 	else if (m_nowState == State::Adsorption)
 	{
 
+		// SEの再生
+		CheckSe();
+
 		// 斥力の初期化
 		m_adPow = k_adsorptionPower;
 		moveDir = m_pos - m_obj.lock()->GetPos();

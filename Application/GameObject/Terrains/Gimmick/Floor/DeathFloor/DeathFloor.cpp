@@ -252,6 +252,9 @@ void DeathFloor::PlayerReaction()
 	//吸着処理
 	else if (m_nowState == State::Adsorption)
 	{
+		// SEの再生
+		CheckSe();
+
 		m_adPow = k_adsorptionPower;
 		moveDir = m_pos - m_obj.lock()->GetPos();
 		if (moveDir.Length() < k_adsorptionPower)m_adPow = moveDir.Length();
