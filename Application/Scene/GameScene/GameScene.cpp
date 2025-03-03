@@ -168,7 +168,7 @@ void GameScene::Init()
 
 	// BGM SEの初期化
 	KdAudioManager::Instance().StopAllSound();
-	//KdAudioManager::Instance().Play(m_jsonData["Bgm"]["URL"], true);
+	KdAudioManager::Instance().Play(m_jsonData["Bgm"]["URL"], true);
 
 
 	ModelManager::Instance().LoadModelFromCSVAsync(m_jsonData["ModelData"]["URL"]);
@@ -683,6 +683,7 @@ void GameScene::LoadGimmickSpecialParam(const std::string& _filePath)
 				//=====================================
 				std::shared_ptr<Barb> barb = std::make_shared<Barb>();
 				barb->Init();
+				barb->SetRotationAngle(row[static_cast<unsigned int>(GimmickDataForSpecial::angle)]);
 				barb->SetModelSize(row[static_cast<unsigned int>(GimmickDataForSpecial::modelSize)]);
 				barb->SetPos({ row[static_cast<unsigned int>(GimmickData::posX)],row[static_cast<unsigned int>(GimmickData::posY)],row[static_cast<unsigned int>(GimmickData::posZ)] });
 				m_objList.push_back(barb);

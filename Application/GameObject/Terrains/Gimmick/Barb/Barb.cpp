@@ -20,7 +20,8 @@ void Barb::Update()
 {
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
 	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_modelSize);
-	m_mWorld = scaleMat * transMat;
+	Math::Matrix rotMat = Math::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(m_rotAngle));
+	m_mWorld = scaleMat * rotMat * transMat;
 }
 
 void Barb::DrawImGui()
@@ -30,6 +31,7 @@ void Barb::DrawImGui()
 	{
 		ImGui::DragFloat3("Barb m_pos", &m_pos.x, 0.1f);
 		ImGui::DragFloat("Barb size", &m_modelSize, 0.1f);
+		ImGui::DragFloat("Barb angle", &m_rotAngle, 0.1f);
 	}
 	ImGui::PopID();
 }

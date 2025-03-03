@@ -105,7 +105,7 @@ void Player::Update()
 	}
 
 	//デバック処理
-	Debug();
+	//Debug();
 }
 
 void Player::PostUpdate()
