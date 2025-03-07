@@ -1101,34 +1101,28 @@ void GameScene::ChangeNextScene()
 	//プレイヤーがゴールした時リザルト画面へ移行する
 	if (GoalManager::instance().GetClearState() == true)
 	{
-		if (GetAsyncKeyState(VK_RETURN) & 0x8000)
-		{
-			if (!m_pushEnterFlg)
-			{
-				if (m_hp.expired() == false)
-				{
-					ScoreManager::instance().RegisterClearHp(m_hp.lock()->GetHpNum());
-					ScoreManager::instance().ConversionScore();
-				}
+		// クリアテキストが表示仕切っていないなら処理しない
+		if (!GoalManager::instance().GetClearTextFlg())return;
 
-				SceneManager::Instance().SetNextScene
-				(
-					SceneManager::SceneType::Result
-				);
-				StartManager::instance().SetStartState(false);
-				m_pushEnterFlg = true;
-			}
-		}
-		else
+		// クリア時のHPをリザルトシーンに伝える
+		if (m_hp.expired() == false)
 		{
-			m_pushEnterFlg = false;
+			ScoreManager::instance().RegisterClearHp(m_hp.lock()->GetHpNum());
+			ScoreManager::instance().ConversionScore();
 		}
+
+		// リザルト画面に自動で切り替える
+		SceneManager::Instance().SetNextScene
+		(
+			SceneManager::SceneType::Result
+		);
+		StartManager::instance().SetStartState(false);
 	}
 	// HPが０になった場合
 	else if (m_player.lock()->GetGameOver() == true)
 	{
 		// タイトル画面に戻る処理
-		if (GetAsyncKeyState(VK_RETURN) & 0x8000)
+		if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) || GetAsyncKeyState(VK_RBUTTON) & 0x8000)
 		{
 			if (!m_pushEnterFlg)
 			{

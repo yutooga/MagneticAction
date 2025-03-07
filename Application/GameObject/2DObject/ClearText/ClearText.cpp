@@ -1,7 +1,8 @@
 ﻿#include "ClearText.h"
+#include"../../Manager/GoalManager/GoalManager.h"
 
 const float ClearText::k_alphaMax = 1.0f;
-const float ClearText::k_addAlphaAmount = 0.05f;
+const float ClearText::k_addAlphaAmount = 0.005f;
 
 void ClearText::Init()
 {
@@ -32,11 +33,14 @@ void ClearText::Update()
 	if (m_alpha >= k_alphaMax)
 	{
 		m_alpha = k_alphaMax;
+		GoalManager::instance().InformClearDraw();	// 透明度が最大値を超えたことを通達する
 	}
 
-	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
-	Math::Matrix scaleMat = Math::Matrix::CreateScale(m_size);
-	m_mWorld = scaleMat * transMat;
+	{
+		Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
+		Math::Matrix scaleMat = Math::Matrix::CreateScale(m_size);
+		m_mWorld = scaleMat * transMat;
+	}
 }
 
 void ClearText::DrawSprite()
@@ -51,8 +55,6 @@ void ClearText::DrawImGui()
 {
 	if (ImGui::CollapsingHeader("ClearText", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::DragFloat("ClearText m_posX", &m_pos.x, 0.1f);
-		ImGui::DragFloat("ClearText m_posY", &m_pos.y, 0.1f);
-		ImGui::DragFloat("ClearText size", &m_size, 0.1f);
+		ImGui::DragFloat("ClearText m_pos", &m_pos.x, 0.1f);
 	}
 }

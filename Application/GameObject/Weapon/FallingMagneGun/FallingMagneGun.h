@@ -29,10 +29,6 @@ public:
 
 	static const float k_rotSpeed;	// オブジェクトの回転スピード
 
-	static const float k_addAnimeCnt;	// アニメーションの加算値
-
-	static const float k_animationMax;	// アニメーションの限界値
-
 	static const float k_adjustValue;	// 座標の補正値
 		
 	// ======================================================
@@ -42,9 +38,6 @@ private:
 	//プレイヤーが銃を取得できるエリアにいるかどうか判定する
 	void JudgmentAcquisition();
 
-	//テキストの更新
-	void TextureUpdate();
-
 	// 銃取得関数
 	void GetMagneGun();
 
@@ -52,19 +45,10 @@ private:
 	std::shared_ptr<KdModelWork> m_model;
 
 	//オブジェクトの大きさ
-	float m_modelSize = 0.08f;
+	float m_modelSize = 0.0f;
 
 	//オブジェクトの回転角度
 	float m_angle = 0.0f;
-
-	//取得可能表示テキストの実体
-	std::shared_ptr<KdSquarePolygon> m_polygon;
-
-	//テキストのアニメーションカウント
-	float m_animeCnt = 0.0f;
-
-	//テキストの行列
-	Math::Matrix m_textureMat = Math::Matrix::Identity;
 
 	//取得可能状態判断フラグ
 	bool m_acquisitionFlg = false;

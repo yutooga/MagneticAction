@@ -17,7 +17,7 @@ void StartBar::Init()
 	m_alphaAdd = m_jsonData["StartBar"].value("AlphaAdd", 0.01f);
 
 	//画像の表示範囲
-	m_rectAngle = { 0,0,m_jsonData["StartBar"].value("RcX",1027),m_jsonData["StartBar"].value("RcY",114) };
+	m_rectAngle = { 0,0,m_jsonData["StartBar"].value("RcX",892),m_jsonData["StartBar"].value("RcY",119) };
 
 	// 行列の確定
 	Math::Matrix transMat = Math::Matrix::CreateTranslation(m_pos);
@@ -45,8 +45,8 @@ void StartBar::Update()
 	// 点滅処理
 	Flashing();
 
-	// ENTERキーでスタート
-	if (GetAsyncKeyState(VK_RETURN) & 0x8000)
+	// クリックでスタート
+	if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) || GetAsyncKeyState(VK_RBUTTON) & 0x8000)
 	{
 		if(!m_pushFlg)
 		{

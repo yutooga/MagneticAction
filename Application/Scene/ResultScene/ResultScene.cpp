@@ -82,8 +82,8 @@ void ResultScene::Event()
 	// スコアが完全に表示されていないなら早期リターン
 	if (!(GoalManager::instance().GetNextSceneFlg()))return;
 
-	// enterキー押したらタイトルシーンに戻る
-	if (GetAsyncKeyState(VK_RETURN) & 0x8000)
+	// クリック押したらタイトルシーンに戻る
+	if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) || GetAsyncKeyState(VK_RBUTTON) & 0x8000)
 	{
 		// 諸々の初期化
 		GoalManager::instance().ResetAllState();

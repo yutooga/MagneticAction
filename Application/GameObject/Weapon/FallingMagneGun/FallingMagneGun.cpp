@@ -6,8 +6,6 @@
 
 const float FallingMagneGun::k_upDownSpeed = 0.03f;
 const float FallingMagneGun::k_rotSpeed = 0.5f;
-const float FallingMagneGun::k_addAnimeCnt = 0.1f;
-const float FallingMagneGun::k_animationMax = 1.4f;
 const float FallingMagneGun::k_adjustValue = 5.f;
 
 void FallingMagneGun::Init()
@@ -26,14 +24,8 @@ void FallingMagneGun::Init()
 		m_model->SetModelData(m_magneGunData["URL"]);
 	}
 
-	//取得可能表示テキスト
-	if(!m_polygon)
-	{
-		m_polygon = std::make_shared<KdSquarePolygon>();
-		m_polygon->SetMaterial("Asset/Textures/Scene/GameScene/2DObject/ChangeInstructions/ChangeInstructions.png");
-		m_polygon->SetSplit(m_magneGunData["Text"].value("SplitX",2), m_magneGunData["Text"].value("SplitY", 1));
-		m_polygon->SetScale(m_magneGunData["Text"].value("Scale", 3.f));
-	}
+	// モデルのサイズ
+	m_modelSize = m_magneGunData.value("ModelSize", 0.08f);
 
 	// モデルの表示座標
 	m_pos = {m_magneGunData["FirstPos"].value("X", -112.f),
@@ -87,7 +79,7 @@ void FallingMagneGun::Update()
 	GetMagneGun();
 
 	//テキストの更新
-	TextureUpdate();
+	//TextureUpdate();
 }
 
 void FallingMagneGun::PostUpdate()
@@ -101,10 +93,6 @@ void FallingMagneGun::DrawLit()
 	//モデルが読み込まれていないなら早期リターン
 	if (!m_model)return;
 	KdShaderManager::Instance().m_StandardShader.DrawModel(*m_model, m_mWorld);
-
-	// 銃の近くまで来たらテキストを表示する
-	if (!m_acquisitionFlg || !m_polygon)return;
-	KdShaderManager::Instance().m_StandardShader.DrawPolygon(*m_polygon, m_textureMat);
 }
 
 void FallingMagneGun::DrawImGui()
@@ -144,74 +132,34 @@ void FallingMagneGun::JudgmentAcquisition()
 	}
 }
 
-void FallingMagneGun::TextureUpdate()
-{
-	// 取得可能状態でなければ早期リターン
-	if (!m_acquisitionFlg)return;
-	
-	//アニメーション更新
-		m_animeCnt += k_addAnimeCnt;
-
-	// 限界値を超えないようにする
-	if (m_animeCnt > k_animationMax)
-	{
-		m_animeCnt = 0.0f;
-	}
-
-	// ポリゴンにセット
-	m_polygon->SetUVRect((int)m_animeCnt);
-
-	//ビルボード処理
-	std::shared_ptr<Player> spPlayer = m_player.lock();
-	Math::Vector3 angle;
-
-	// プレイヤーの回転角度を取得する
-	if (spPlayer)
-	{
-		angle = spPlayer->GetRotateAngle();
-	}
-
-	//テキストの行列更新
-
-	Math::Matrix rotMat = Math::Matrix::CreateFromYawPitchRoll(
-			DirectX::XMConvertToRadians(angle.y),
-			DirectX::XMConvertToRadians(angle.x),
-			0.0f);
-
-	 Math::Matrix transMat = Math::Matrix::CreateTranslation({ m_pos.x,m_pos.y + k_adjustValue, m_pos.z });
-
-	 m_textureMat = rotMat * transMat;
-}
-
 void FallingMagneGun::GetMagneGun()
 {
 	//取得可能状態でなければ早期リターン
 	if (!m_acquisitionFlg)return;
 
-	if (GetAsyncKeyState(VK_RETURN) & 0x8000)
 	{
+		std::shared_ptr<MagneGun> Gun = m_gun.lock();
+		if (Gun)
 		{
-			std::shared_ptr<MagneGun> Gun = m_gun.lock();
-			if (Gun)
-			{
-				Gun->SetUpdate(true);
-			}
+			Gun->SetUpdate(true);
 		}
-
-		// レティクル作成
-		{
-			std::shared_ptr<Reticle> reticle = std::make_shared<Reticle>();
-			reticle->Init();
-			SceneManager::Instance().AddObject(reticle);
-		}
-
-		// 存在を消滅させる
-		m_isExpired = true;
-
-		// エフェクトを停止させる
-		KdEffekseerManager::GetInstance().StopEffect(m_effectName, m_firstPos);
-
-		//銃取得のSE再生
-		KdAudioManager::Instance().Play(m_magneGunData["Se"]["URL"], false);
 	}
+
+	// 取得可能状態になったら自動で取得する
+
+	// レティクル作成
+	{
+		std::shared_ptr<Reticle> reticle = std::make_shared<Reticle>();
+		reticle->Init();
+		SceneManager::Instance().AddObject(reticle);
+	}
+
+	// 存在を消滅させる
+	m_isExpired = true;
+
+	// エフェクトを停止させる
+	KdEffekseerManager::GetInstance().StopEffect(m_effectName, m_firstPos);
+
+	//銃取得のSE再生
+	KdAudioManager::Instance().Play(m_magneGunData["Se"]["URL"], false);
 }

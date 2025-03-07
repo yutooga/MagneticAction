@@ -14,8 +14,8 @@ const float TitleScene::k_alphaMax = 1.0f;
 void TitleScene::Event()
 {
 
-	// ENTERキーで次のシーンへいく
-	if (GetAsyncKeyState(VK_RETURN) & 0x8000)
+	// クリックで次のシーンへいく
+	if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) || GetAsyncKeyState(VK_RBUTTON) & 0x8000)
 	{
 		if ((!m_pushEnterFlg) && m_fadeIn.expired() == false)
 		{
