@@ -35,6 +35,13 @@ public:
 	//扉の開閉状態設定関数
 	void SetOpenState(const bool _state) { m_openFlg = _state; }
 
+	// 状態をリセットする関数
+	void AllReSet() { 
+		m_electromagneticInductionFlg = false;
+		m_openFlg = false;
+		m_nowState = State::NotStart;
+	}
+
 private:
 
 	GateManager() = default;

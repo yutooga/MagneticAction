@@ -25,6 +25,8 @@ public:
 		six
 	};
 
+	void Init()override;
+
 	const bool GetLiftUpdate()const { return m_woodenLiftUpdateFlg; }
 
 	const bool GetDoorUpdate()const { return m_copperDoorFlg; }

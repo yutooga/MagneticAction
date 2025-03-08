@@ -170,6 +170,9 @@ void GameScene::Init()
 	KdAudioManager::Instance().StopAllSound();
 	KdAudioManager::Instance().Play(m_jsonData["Bgm"]["URL"], true);
 
+	// マネージャーの情報の初期化
+	UpdateObjManager::Instance().Init();
+	GateManager::Instance().AllReSet();
 
 	ModelManager::Instance().LoadModelFromCSVAsync(m_jsonData["ModelData"]["URL"]);
 
@@ -1186,7 +1189,7 @@ KdGameObject::ObjectType GameScene::FindNextTarget(const std::weak_ptr<KdGameObj
 
 void GameScene::ElectroMagneticInductionUpdateObject()
 {
-	if (UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::one).maguneforce != UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::two).maguneforce)
+    if (UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::one).maguneforce != UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::two).maguneforce)
 	{
 		UpdateObjManager::Instance().SetLiftUpdate(true);
 	}
@@ -1207,9 +1210,9 @@ void GameScene::ElectroMagneticInductionUpdateObject()
 	UINT forceForFive = UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::five).maguneforce;
 	UINT forceForSix = UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::six).maguneforce;
 
-	if (forceForFive != forceForSix)
+	if (((forceForFive & KdGameObject::NoForce) == 0) && ((forceForSix & KdGameObject::NoForce) == 0))
 	{
-		if (((forceForFive & KdGameObject::NoForce) == 0) && ((forceForSix & KdGameObject::NoForce) == 0))
+		if (forceForFive != forceForSix)
 		{
 			// 電磁誘導していることを知らせる
 			GateManager::Instance().SetElectromagneticInduction(true);
@@ -1219,10 +1222,10 @@ void GameScene::ElectroMagneticInductionUpdateObject()
 				GateManager::Instance().SetState(GateManager::State::NoticeAnimation);
 			}
 		}
-	}
-	else
-	{
-		// 電磁誘導していないことを知らせる
-		GateManager::Instance().SetElectromagneticInduction(false);
+		else
+		{
+			// 電磁誘導していないことを知らせる
+			GateManager::Instance().SetElectromagneticInduction(false);
+		}
 	}
 }
