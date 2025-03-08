@@ -63,8 +63,8 @@ bool ElectricCurrent::JugmentEffect()
 	{
 		// 対象のオブジェクトが木のリフトの時
 	case ElectricCurrent::TargetObject::WoodenLift:
-		// 木のリフトが作動しているならtrueを返す
-		if (UpdateObjManager::Instance().GetLiftUpdate())
+		// 木のリフトが作動可能状態ならtrueを返す
+		if (UpdateObjManager::Instance().GetElecLiftUpdate())
 		{
 			return true;
 		}
@@ -75,8 +75,8 @@ bool ElectricCurrent::JugmentEffect()
 		break;
 		// 対象のオブジェクトが銅の扉の時
 	case ElectricCurrent::TargetObject::CopperDoor:
-		// 銅の扉が作動しているならtrueを返す
-		if (UpdateObjManager::Instance().GetDoorUpdate())
+		// 銅の扉が作動可能状態しているならtrueを返す
+		if (UpdateObjManager::Instance().GetElecDoorUpdate())
 		{
 			return true;
 		}

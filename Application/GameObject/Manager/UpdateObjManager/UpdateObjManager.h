@@ -31,6 +31,10 @@ public:
 
 	const bool GetDoorUpdate()const { return m_copperDoorFlg; }
 
+	const bool GetElecLiftUpdate()const { return m_elecLiftFlg; }
+
+	const bool GetElecDoorUpdate()const { return m_elecDoorFlg; }
+
 	const KeyObj GetKeyObjects(int _number)const { return m_keyObjects[_number]; }
 
 	void SetMaguneForce(const UINT _force, const int _number) { m_keyObjects[_number].maguneforce = _force; }
