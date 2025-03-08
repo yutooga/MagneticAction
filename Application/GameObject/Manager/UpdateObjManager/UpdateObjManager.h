@@ -39,6 +39,10 @@ public:
 
 	void SetDoorUpdate(const bool _door) { m_copperDoorFlg = _door; }
 
+	void SetElecDoorUpdate(const bool _flg) { m_elecDoorFlg = _flg; }
+
+	void SetElecLiftUpdate(const bool _flg) { m_elecLiftFlg = _flg; }
+
 private:
 	UpdateObjManager() = default;
 	~UpdateObjManager() = default;
@@ -47,8 +51,14 @@ private:
 	// リフト更新判断フラグ
 	bool m_woodenLiftUpdateFlg = false;
 
+	// リフトのほうに流れる電流の更新判断フラグ
+	bool m_elecLiftFlg = false;
+
 	// 銅の扉更新判断フラグ
 	bool m_copperDoorFlg = false;
+
+	// 銅のドアのほうに流れる電流の更新判断フラグ
+	bool m_elecDoorFlg = false;
 
 	KeyObj m_keyObjects[six] = {};
 };

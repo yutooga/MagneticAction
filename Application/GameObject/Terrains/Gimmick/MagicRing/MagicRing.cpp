@@ -9,10 +9,22 @@ const float MagicRing::k_addAmount = 0.001f;
 void MagicRing::Init()
 {
 	// モデルの読み込み
-	if (!m_model)
+	switch (m_objType)
 	{
-		m_model = ModelManager::Instance().GetModel("MagicRing");
+	case KdGameObject::ObjectType::NoForceRing:
+		if (!m_model)
+		{
+			m_model = ModelManager::Instance().GetModel("NoForceMagicRing");
+		}
+		break;
+	default:
+		if (!m_model)
+		{
+			m_model = ModelManager::Instance().GetModel("MagicRing");
+		}
+		break;
 	}
+	
 
 	// 当たり判定の形状登録
 	m_pCollider = std::make_unique<KdCollider>();
@@ -37,9 +49,6 @@ void MagicRing::Init()
 
 	//ImGui用のランダムなIdの生成
 	m_randomId = rand();
-
-	// 纏っている磁力の初期化
-	m_maguneForce = NoForce;
 }
 
 void MagicRing::Update()

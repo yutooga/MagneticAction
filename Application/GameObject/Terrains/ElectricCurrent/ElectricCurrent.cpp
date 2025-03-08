@@ -123,6 +123,25 @@ void ElectricCurrent::DestinationForEnd::Update(ElectricCurrent& owner)
 			// 目的地を中継地点に変える
 			owner.SetMoveState(std::make_shared<ElectricCurrent::DestinationForStopover>());
 		}
+
+		// 電流エフェクトが終着地点についてからオブジェクトの動作を始める
+		switch (owner.m_target)
+		{
+		case ElectricCurrent::TargetObject::WoodenLift:
+			if(UpdateObjManager::Instance().GetLiftUpdate() == false)
+			{
+				UpdateObjManager::Instance().SetLiftUpdate(true);
+			}
+			break;
+		case ElectricCurrent::TargetObject::CopperDoor:
+			if (UpdateObjManager::Instance().GetDoorUpdate() == false)
+			{
+				UpdateObjManager::Instance().SetDoorUpdate(true);
+			}
+			break;
+		default:
+			break;
+		}
 	}
 	// 距離が速度の値より短いなら速度をその距離の値にする
 	else if (movedir.Length() < k_moveSpeed)owner.m_moveSpeed = movedir.Length();

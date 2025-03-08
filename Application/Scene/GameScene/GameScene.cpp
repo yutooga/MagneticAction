@@ -505,7 +505,7 @@ void GameScene::LoadGimmickDefaultParam(const std::string& _filePath)
 				//=====================================
 				// 魔法陣初期化(磁力付与なし)
 				//=====================================
-				CreateMagicRing(KdGameObject::ObjectType::NoForceRing, "", row[static_cast<unsigned int>(GimmickData::posX)], row[static_cast<unsigned int>(GimmickData::posY)], row[static_cast<unsigned int>(GimmickData::posZ)]);
+				CreateMagicRing(KdGameObject::ObjectType::NoForceRing, "MagicArea.efkproj", row[static_cast<unsigned int>(GimmickData::posX)], row[static_cast<unsigned int>(GimmickData::posY)], row[static_cast<unsigned int>(GimmickData::posZ)]);
 				break;
 			}
 			case 22:
@@ -1024,8 +1024,8 @@ void GameScene::CreateMagicRing(KdGameObject::ObjectType _magune, const std::str
 	std::shared_ptr<MagicRing> ring = std::make_shared<MagicRing>();
 	ring->SetEffectName(_effectName);
 	ring->SetPos({ _posX,_posY,_posZ });
-	ring->Init();
 	ring->SetObjType(_magune);
+	ring->Init();
 	m_objList.push_back(ring);
 }
 
@@ -1191,20 +1191,22 @@ void GameScene::ElectroMagneticInductionUpdateObject()
 {
     if (UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::one).maguneforce != UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::two).maguneforce)
 	{
-		UpdateObjManager::Instance().SetLiftUpdate(true);
+		UpdateObjManager::Instance().SetElecLiftUpdate(true);
 	}
 	else
 	{
+		UpdateObjManager::Instance().SetElecLiftUpdate(false);
 		UpdateObjManager::Instance().SetLiftUpdate(false);
 	}
 
 	if (UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::three).maguneforce != UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::four).maguneforce)
 	{
-		UpdateObjManager::Instance().SetDoorUpdate(true);
+		UpdateObjManager::Instance().SetElecDoorUpdate(true);
 	}
 	else
 	{
 		UpdateObjManager::Instance().SetDoorUpdate(false);
+		UpdateObjManager::Instance().SetElecDoorUpdate(false);
 	}
 
 	UINT forceForFive = UpdateObjManager::Instance().GetKeyObjects(UpdateObjManager::five).maguneforce;
