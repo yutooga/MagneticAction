@@ -6,6 +6,7 @@
 #include"../../2DObject/GameOver/GameOver.h"
 #include"../../Manager/GoalManager/GoalManager.h"
 #include"../../Manager/StartManager/StartManager.h"
+#include"../../Manager/UpdateObjManager/UpdateObjManager.h"
 
 //====================================================
 const float Player::k_deathPlayerHeight = -1000.f;
@@ -105,7 +106,7 @@ void Player::Update()
 	}
 
 	//デバック処理
-	Debug();
+	//Debug();
 }
 
 void Player::PostUpdate()
@@ -259,6 +260,7 @@ void Player::DrawImGui()
 
 	ImGui::DragFloat3("playerPos m_pos", &m_pos.x, 0.1f);
 	ImGui::DragFloat("m_shadowSize", &m_shadowSize, 0.1f);
+	ImGui::DragFloat("adjustHeight", &m_door_player_AdjustColisionHeight, 0.1f);
 }
 
 void Player::DrawUnLit()
@@ -433,6 +435,14 @@ void Player::Player_TerrainSphereColision()
 			}
 			// SE再生のクールタイムの設定
 			m_seInterval = m_jsonData.value("SeCoolTime", 60);
+		}
+		// プレイヤーが銅の扉の下にいるなら扉の更新を止める
+		else if(hitFlg && obj->GetObjType() == KdGameObject::ObjectType::CopperDoor)
+		{
+			if (m_pos.y < (obj->GetPos().y - m_door_player_AdjustColisionHeight))
+			{
+				UpdateObjManager::Instance().SetDoorUpdate(false);
+			}
 		}
 	}
 

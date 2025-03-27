@@ -62,6 +62,7 @@ public:
 		MagneBox,
 		ObstructiveWall,
 		MoveMagneFloorNomalVer,
+		CopperDoor,
 		None
 	};
 

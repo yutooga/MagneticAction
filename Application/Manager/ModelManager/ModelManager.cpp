@@ -3,6 +3,7 @@
 // 非同期にモデルをロードする関数
 void ModelManager::LoadModelFromCSVAsync(const std::string& _fileName)
 {
+	// ファイルを開く
 	std::ifstream file(_fileName);
 	if (!file)
 	{

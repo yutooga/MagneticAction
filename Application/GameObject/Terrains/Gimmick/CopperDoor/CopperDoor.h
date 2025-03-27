@@ -15,6 +15,8 @@ public:
 
 	void DrawBright()override {}
 
+	ObjectType GetObjType()override { return ObjectType::CopperDoor; }
+
 private:
 
 	// モデルのサイズ

@@ -36,7 +36,7 @@ public:
 	const bool GetGameOver()const { return m_gameoverFlg; }
 
 	// プレイヤーがリフトの上に乗っているかどうか取得
-	const bool GetRideOn() const{ return m_rideOnFlg; }
+	const bool GetRideOn() const { return m_rideOnFlg; }
 
 	const Math::Vector3 GetRotateAngle()const
 	{
@@ -54,7 +54,7 @@ public:
 	static const float k_colisionRadius;	// 当たり判定の半径
 
 	//================================================
-	
+
 	enum class ColisionCircle
 	{
 		Top,
@@ -100,7 +100,7 @@ private:
 
 	// 影描画判断
 	void JudgmentShadow();
-	
+
 	//ゲームオーバー処理
 	void GameOverPlayer();
 
@@ -204,4 +204,7 @@ private:
 
 	// プレイヤーがリフトの上に乗っているかどうか判断するフラグ
 	bool m_rideOnFlg = false;
+
+	// プレイヤーが銅の扉の下にいた時めり込まないようにする判定に利用する補正値
+	float m_door_player_AdjustColisionHeight = 0.0f;
 };

@@ -28,6 +28,6 @@ private:
 	ModelManager() = default;
 	~ModelManager() = default;
 
-	std::unordered_map<std::string, std::shared_ptr<KdModelWork>> m_models;
+	std::unordered_map<std::string, std::shared_ptr<KdModelWork>> m_models; // モデルデータのコンテナ
 	std::mutex m_mutex; // スレッドセーフのためのミューテックス
 };
